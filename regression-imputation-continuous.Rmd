@@ -1,0 +1,585 @@
+##################
+#This file imputes missing values of continuous data using Stochastic Regression imputation
+#This example uses an anthropological dataset that has 5% missing data
+#Examines the success of Stochastic Regression imputation of these data against the complete dataset
+#################
+
+#This approach uses the R package 'mice'
+#The R package 'irr' is used for Cohen's kappa
+#continuousdata.csv = the full dataset (used only for evaluating level of success)
+#one.csv = the csv file that has 5% missing values
+
+**Variable Names**
+#FL_L - femur length left
+#FL_R - femur length right
+#T1.AP - T1 antero-posterior length
+#T1.TR - T1 transverse length
+#L1.AP - L1 antero-posterior length
+#L1.TR - L1 transverse length
+
+###################################
+Set up workspace and load libraries
+###################################
+
+rm(list=ls())
+
+library(mice)
+library(irr)
+
+setwd("C:/Users/Amanda Wissler/Documents/Spring 2021/imputation")
+dat<-read.csv("continuousdata.csv", header=T)
+
+#Load the datasets that have 5% missing data. In this case I have 5 different datasets. 
+cont.five.1<-read.csv("cont.five.1.csv", header=T)
+cont.five.2<-read.csv("cont.five.2.csv", header=T)
+cont.five.3<-read.csv("cont.five.3.csv", header=T)
+cont.five.4<-read.csv("cont.five.4.csv", header=T)
+cont.five.5<-read.csv("cont.five.5.csv", header=T)
+
+#Establish the mean and variance for the complete dataset so you can evaluate imputed values
+FL.Ldatmean<-mean(dat$FL_Left)
+FL.Rdatmean<-mean(dat$FL_Right)
+T1.APdatmean<-mean(dat$T1.AP)
+T1.TRdatmean<-mean(dat$T1.TR)
+T5.APdatmean<-mean(dat$T5.AP)
+T5.TRdatmean<-mean(dat$T5.TR)
+T10.APdatmean<-mean(dat$T10.AP)
+T10.TRdatmean<-mean(dat$T10.TR)
+L1.APdatmean<-mean(dat$L1.AP)
+L1.TRdatmean<-mean(dat$L1.TR)
+L3.APdatmean<-mean(dat$L3.AP)
+L3.TRdatmean<-mean(dat$L3.TR)
+
+FL.Ldatvar<-var(dat$FL_Left)
+FL.Rdatvar<-var(dat$FL_Right)
+T1.APdatvar<-var(dat$T1.AP)
+T1.TRdatvar<-var(dat$T1.TR)
+T5.APdatvar<-var(dat$T5.AP)
+T5.TRdatvar<-var(dat$T5.TR)
+T10.APdatvar<-var(dat$T10.AP)
+T10.TRdatvar<-var(dat$T10.TR)
+L1.APdatvar<-var(dat$L1.AP)
+L1.TRdatvar<-var(dat$L1.TR)
+L3.APdatvar<-var(dat$L3.AP)
+L3.TRdatvar<-var(dat$L3.TR)
+
+################
+Impute the data
+###############
+
+#Using the 'mice' package
+#m = number of imputations
+#maxit = the number of iterations
+#method = sets the method. In this case we want stochastic regression imputation which is "norm.nob"
+#seed = set the seed so that you get the same numbers imputed each time you run the code
+
+tempdata.five.1<-mice(cont.five.1, m=10, maxit=50, method="norm.nob", seed=1)
+tempdata.five.2<-mice(cont.five.2, m=10, maxit=50, method="norm.nob", seed=1)
+tempdata.five.3<-mice(cont.five.3, m=10, maxit=50, method="norm.nob", seed=1)
+tempdata.five.4<-mice(cont.five.4, m=10, maxit=50, method="norm.nob", seed=1)
+tempdata.five.5<-mice(cont.five.5, m=10, maxit=50, method="norm.nob", seed=1)
+
+#################
+Complete and Pool
+#################
+
+#Each of the m=10 imputations must be added into the dataset and then all 10 versions pooled into a single dataset
+#NOTE that pooling the imputed values at this point prior to running statistical analysis violates Rubin's Rules.
+#In this case, since we are only interested in the success of the imputation it is okay to pool now
+
+#ONE
+one1<-complete(tempdata.five.1,1)
+two1<-complete(tempdata.five.1,2)
+three1<-complete(tempdata.five.1,3)
+four1<-complete(tempdata.five.1,4)
+five1<-complete(tempdata.five.1,5)  
+six1<-complete(tempdata.five.1,6) 
+seven1<-complete(tempdata.five.1,7) 
+eight1<-complete(tempdata.five.1,8) 
+nine1<-complete(tempdata.five.1,9) 
+ten1<-complete(tempdata.five.1,10)
+
+five_one_imp<-(one1 + two1 + three1 + four1 + five1 + six1 + seven1 + eight1 + nine1 + ten1)/10
+
+#TWO
+one2<-complete(tempdata.five.2,1)
+two2<-complete(tempdata.five.2,2)
+three2<-complete(tempdata.five.2,3)
+four2<-complete(tempdata.five.2,4)
+five2<-complete(tempdata.five.2,5)
+six2<-complete(tempdata.five.2,6) 
+seven2<-complete(tempdata.five.2,7) 
+eight2<-complete(tempdata.five.2,8) 
+nine2<-complete(tempdata.five.2,9) 
+ten2<-complete(tempdata.five.2,10)
+
+five_two_imp<-(one2 + two2 + three2 + four2 + five2 + six2 + seven2 + eight2 + nine2 + ten2)/10
+
+#THREE
+one3<-complete(tempdata.five.3,1)
+two3<-complete(tempdata.five.3,2)
+three3<-complete(tempdata.five.3,3)
+four3<-complete(tempdata.five.3,4)
+five3<-complete(tempdata.five.3,5)  
+six3<-complete(tempdata.five.3,6) 
+seven3<-complete(tempdata.five.3,7) 
+eight3<-complete(tempdata.five.3,8) 
+nine3<-complete(tempdata.five.3,9) 
+ten3<-complete(tempdata.five.3,10)
+
+five_three_imp<-(one3 + two3 + three3 + four3 + five3 + six3 + seven3 + eight3 + nine3 + ten3)/10
+
+#FOUR
+one4<-complete(tempdata.five.4,1)
+two4<-complete(tempdata.five.4,2)
+three4<-complete(tempdata.five.4,3)
+four4<-complete(tempdata.five.4,4)
+five4<-complete(tempdata.five.4,5)  
+six4<-complete(tempdata.five.4,6) 
+seven4<-complete(tempdata.five.4,7) 
+eight4<-complete(tempdata.five.4,8) 
+nine4<-complete(tempdata.five.4,9) 
+ten4<-complete(tempdata.five.4,10)
+
+five_four_imp<-(one4 + two4 + three4 + four4 + five4 + six4 + seven4 + eight4 + nine4 + ten4)/10
+
+#FIVE
+one5<-complete(tempdata.five.5,1)
+two5<-complete(tempdata.five.5,2)
+three5<-complete(tempdata.five.5,3)
+four5<-complete(tempdata.five.5,4)
+five5<-complete(tempdata.five.5,5) 
+six5<-complete(tempdata.five.5,6) 
+seven5<-complete(tempdata.five.5,7) 
+eight5<-complete(tempdata.five.5,8) 
+nine5<-complete(tempdata.five.5,9) 
+ten5<-complete(tempdata.five.5,10)
+
+five_five_imp<-(one5 + two5 + three5 + four5 + five5 + six5 + seven5 + eight5 + nine5 + ten5)/10
+
+#################################
+#Assess Success of Imputed Values
+#################################
+
+#By success, we mean how close the imputed datasets are to the original dataset
+#Below, we separate each variable to assess
+
+#ONE
+FL.Lmeanreg.1<-mean(five_one_imp$FL_L, na.rm=TRUE)
+FL.Rmeanreg.1<-mean(five_one_imp$FL_R, na.rm=TRUE)
+T1.APmeanreg.1<-mean(five_one_imp$T1.AP, na.rm=TRUE)
+T1.TRmeanreg.1<-mean(five_one_imp$T1.TR, na.rm=TRUE)
+T5.APmeanreg.1<-mean(five_one_imp$T5.AP, na.rm=TRUE)
+T5.TRmeanreg.1<-mean(five_one_imp$T5.TR, na.rm=TRUE)
+T10.APmeanreg.1<-mean(five_one_imp$T10.AP, na.rm=TRUE)
+T10.TRmeanreg.1<-mean(five_one_imp$T10.TR, na.rm=TRUE)
+L1.APmeanreg.1<-mean(five_one_imp$L1.AP, na.rm=TRUE)
+L1.TRmeanreg.1<-mean(five_one_imp$L1.TR, na.rm=TRUE)
+L3.APmeanreg.1<-mean(five_one_imp$L3.AP, na.rm=TRUE)
+L3.TRmeanreg.1<-mean(five_one_imp$L3.TR, na.rm=TRUE)
+
+FL.Lvarreg.1<-var(five_one_imp$FL_L, na.rm=TRUE)
+FL.Rvarreg.1<-var(five_one_imp$FL_R, na.rm=TRUE)
+T1.APvarreg.1<-var(five_one_imp$T1.AP, na.rm=TRUE)
+T1.TRvarreg.1<-var(five_one_imp$T1.TR, na.rm=TRUE)
+T5.APvarreg.1<-var(five_one_imp$T5.AP, na.rm=TRUE)
+T5.TRvarreg.1<-var(five_one_imp$T5.TR, na.rm=TRUE)
+T10.APvarreg.1<-var(five_one_imp$T10.AP, na.rm=TRUE)
+T10.TRvarreg.1<-var(five_one_imp$T10.TR, na.rm=TRUE)
+L1.APvarreg.1<-var(five_one_imp$L1.AP, na.rm=TRUE)
+L1.TRvarreg.1<-var(five_one_imp$L1.TR, na.rm=TRUE)
+L3.APvarreg.1<-var(five_one_imp$L3.AP, na.rm=TRUE)
+L3.TRvarreg.1<-var(five_one_imp$L3.TR, na.rm=TRUE)
+
+#TWO
+FL.Lmeanreg.2<-mean(five_two_imp$FL_L, na.rm=TRUE)
+FL.Rmeanreg.2<-mean(five_two_imp$FL_R, na.rm=TRUE)
+T1.APmeanreg.2<-mean(five_two_imp$T1.AP, na.rm=TRUE)
+T1.TRmeanreg.2<-mean(five_two_imp$T1.TR, na.rm=TRUE)
+T5.APmeanreg.2<-mean(five_two_imp$T5.AP, na.rm=TRUE)
+T5.TRmeanreg.2<-mean(five_two_imp$T5.TR, na.rm=TRUE)
+T10.APmeanreg.2<-mean(five_two_imp$T10.AP, na.rm=TRUE)
+T10.TRmeanreg.2<-mean(five_two_imp$T10.TR, na.rm=TRUE)
+L1.APmeanreg.2<-mean(five_two_imp$L1.AP, na.rm=TRUE)
+L1.TRmeanreg.2<-mean(five_two_imp$L1.TR, na.rm=TRUE)
+L3.APmeanreg.2<-mean(five_two_imp$L3.AP, na.rm=TRUE)
+L3.TRmeanreg.2<-mean(five_two_imp$L3.TR, na.rm=TRUE)
+
+FL.Lvarreg.2<-var(five_two_imp$FL_L, na.rm=TRUE)
+FL.Rvarreg.2<-var(five_two_imp$FL_R, na.rm=TRUE)
+T1.APvarreg.2<-var(five_two_imp$T1.AP, na.rm=TRUE)
+T1.TRvarreg.2<-var(five_two_imp$T1.TR, na.rm=TRUE)
+T5.APvarreg.2<-var(five_two_imp$T5.AP, na.rm=TRUE)
+T5.TRvarreg.2<-var(five_two_imp$T5.TR, na.rm=TRUE)
+T10.APvarreg.2<-var(five_two_imp$T10.AP, na.rm=TRUE)
+T10.TRvarreg.2<-var(five_two_imp$T10.TR, na.rm=TRUE)
+L1.APvarreg.2<-var(five_two_imp$L1.AP, na.rm=TRUE)
+L1.TRvarreg.2<-var(five_two_imp$L1.TR, na.rm=TRUE)
+L3.APvarreg.2<-var(five_two_imp$L3.AP, na.rm=TRUE)
+L3.TRvarreg.2<-var(five_two_imp$L3.TR, na.rm=TRUE)
+
+#THREE
+FL.Lmeanreg.3<-mean(five_three_imp$FL_L, na.rm=TRUE)
+FL.Rmeanreg.3<-mean(five_three_imp$FL_R, na.rm=TRUE)
+T1.APmeanreg.3<-mean(five_three_imp$T1.AP, na.rm=TRUE)
+T1.TRmeanreg.3<-mean(five_three_imp$T1.TR, na.rm=TRUE)
+T5.APmeanreg.3<-mean(five_three_imp$T5.AP, na.rm=TRUE)
+T5.TRmeanreg.3<-mean(five_three_imp$T5.TR, na.rm=TRUE)
+T10.APmeanreg.3<-mean(five_three_imp$T10.AP, na.rm=TRUE)
+T10.TRmeanreg.3<-mean(five_three_imp$T10.TR, na.rm=TRUE)
+L1.APmeanreg.3<-mean(five_three_imp$L1.AP, na.rm=TRUE)
+L1.TRmeanreg.3<-mean(five_three_imp$L1.TR, na.rm=TRUE)
+L3.APmeanreg.3<-mean(five_three_imp$L3.AP, na.rm=TRUE)
+L3.TRmeanreg.3<-mean(five_three_imp$L3.TR, na.rm=TRUE)
+
+FL.Lvarreg.3<-var(five_three_imp$FL_L, na.rm=TRUE)
+FL.Rvarreg.3<-var(five_three_imp$FL_R, na.rm=TRUE)
+T1.APvarreg.3<-var(five_three_imp$T1.AP, na.rm=TRUE)
+T1.TRvarreg.3<-var(five_three_imp$T1.TR, na.rm=TRUE)
+T5.APvarreg.3<-var(five_three_imp$T5.AP, na.rm=TRUE)
+T5.TRvarreg.3<-var(five_three_imp$T5.TR, na.rm=TRUE)
+T10.APvarreg.3<-var(five_three_imp$T10.AP, na.rm=TRUE)
+T10.TRvarreg.3<-var(five_three_imp$T10.TR, na.rm=TRUE)
+L1.APvarreg.3<-var(five_three_imp$L1.AP, na.rm=TRUE)
+L1.TRvarreg.3<-var(five_three_imp$L1.TR, na.rm=TRUE)
+L3.APvarreg.3<-var(five_three_imp$L3.AP, na.rm=TRUE)
+L3.TRvarreg.3<-var(five_three_imp$L3.TR, na.rm=TRUE)
+
+#FOUR
+FL.Lmeanreg.4<-mean(five_four_imp$FL_L, na.rm=TRUE)
+FL.Rmeanreg.4<-mean(five_four_imp$FL_R, na.rm=TRUE)
+T1.APmeanreg.4<-mean(five_four_imp$T1.AP, na.rm=TRUE)
+T1.TRmeanreg.4<-mean(five_four_imp$T1.TR, na.rm=TRUE)
+T5.APmeanreg.4<-mean(five_four_imp$T5.AP, na.rm=TRUE)
+T5.TRmeanreg.4<-mean(five_four_imp$T5.TR, na.rm=TRUE)
+T10.APmeanreg.4<-mean(five_four_imp$T10.AP, na.rm=TRUE)
+T10.TRmeanreg.4<-mean(five_four_imp$T10.TR, na.rm=TRUE)
+L1.APmeanreg.4<-mean(five_four_imp$L1.AP, na.rm=TRUE)
+L1.TRmeanreg.4<-mean(five_four_imp$L1.TR, na.rm=TRUE)
+L3.APmeanreg.4<-mean(five_four_imp$L3.AP, na.rm=TRUE)
+L3.TRmeanreg.4<-mean(five_four_imp$L3.TR, na.rm=TRUE)
+
+FL.Lvarreg.4<-var(five_four_imp$FL_L, na.rm=TRUE)
+FL.Rvarreg.4<-var(five_four_imp$FL_R, na.rm=TRUE)
+T1.APvarreg.4<-var(five_four_imp$T1.AP, na.rm=TRUE)
+T1.TRvarreg.4<-var(five_four_imp$T1.TR, na.rm=TRUE)
+T5.APvarreg.4<-var(five_four_imp$T5.AP, na.rm=TRUE)
+T5.TRvarreg.4<-var(five_four_imp$T5.TR, na.rm=TRUE)
+T10.APvarreg.4<-var(five_four_imp$T10.AP, na.rm=TRUE)
+T10.TRvarreg.4<-var(five_four_imp$T10.TR, na.rm=TRUE)
+L1.APvarreg.4<-var(five_four_imp$L1.AP, na.rm=TRUE)
+L1.TRvarreg.4<-var(five_four_imp$L1.TR, na.rm=TRUE)
+L3.APvarreg.4<-var(five_four_imp$L3.AP, na.rm=TRUE)
+L3.TRvarreg.4<-var(five_four_imp$L3.TR, na.rm=TRUE)
+
+#FIVE
+FL.Lmeanreg.5<-mean(five_five_imp$FL_L, na.rm=TRUE)
+FL.Rmeanreg.5<-mean(five_five_imp$FL_R, na.rm=TRUE)
+T1.APmeanreg.5<-mean(five_five_imp$T1.AP, na.rm=TRUE)
+T1.TRmeanreg.5<-mean(five_five_imp$T1.TR, na.rm=TRUE)
+T5.APmeanreg.5<-mean(five_five_imp$T5.AP, na.rm=TRUE)
+T5.TRmeanreg.5<-mean(five_five_imp$T5.TR, na.rm=TRUE)
+T10.APmeanreg.5<-mean(five_five_imp$T10.AP, na.rm=TRUE)
+T10.TRmeanreg.5<-mean(five_five_imp$T10.TR, na.rm=TRUE)
+L1.APmeanreg.5<-mean(five_five_imp$L1.AP, na.rm=TRUE)
+L1.TRmeanreg.5<-mean(five_five_imp$L1.TR, na.rm=TRUE)
+L3.APmeanreg.5<-mean(five_five_imp$L3.AP, na.rm=TRUE)
+L3.TRmeanreg.5<-mean(five_five_imp$L3.TR, na.rm=TRUE)
+
+FL.Lvarreg.5<-var(five_five_imp$FL_L, na.rm=TRUE)
+FL.Rvarreg.5<-var(five_five_imp$FL_R, na.rm=TRUE)
+T1.APvarreg.5<-var(five_five_imp$T1.AP, na.rm=TRUE)
+T1.TRvarreg.5<-var(five_five_imp$T1.TR, na.rm=TRUE)
+T5.APvarreg.5<-var(five_five_imp$T5.AP, na.rm=TRUE)
+T5.TRvarreg.5<-var(five_five_imp$T5.TR, na.rm=TRUE)
+T10.APvarreg.5<-var(five_five_imp$T10.AP, na.rm=TRUE)
+T10.TRvarreg.5<-var(five_five_imp$T10.TR, na.rm=TRUE)
+L1.APvarreg.5<-var(five_five_imp$L1.AP, na.rm=TRUE)
+L1.TRvarreg.5<-var(five_five_imp$L1.TR, na.rm=TRUE)
+L3.APvarreg.5<-var(five_five_imp$L3.AP, na.rm=TRUE)
+L3.TRvarreg.5<-var(five_five_imp$L3.TR, na.rm=TRUE)
+
+#Assess Cohen's Kappa and Kendall's Tau 
+#Construct a dataframe that puts the actual data values from the real dataset next to each imputed value 
+#kappa2 = Cohen's Kappa
+#cor.test is the Kendall's tau
+#Do for each version of the data. Here it is 5 times
+
+#ONE
+FL.L<-cbind(dat$FL_L, five_one_imp$FL_L)
+FL.R<-cbind(dat$FL_R, five_one_imp$FL_R)
+T1.AP<-cbind(dat$T1.AP, five_one_imp$T1.AP)
+T1.TR<-cbind(dat$T1.TR, five_one_imp$T1.TR)
+T5.AP<-cbind(dat$T5.AP, five_one_imp$T5.AP)
+T5.TR<-cbind(dat$T5.TR, five_one_imp$T5.TR)
+T10.AP<-cbind(dat$T10.AP, five_one_imp$T10.AP)
+T10.TR<-cbind(dat$T10.TR, five_one_imp$T10.TR)
+L1.AP<-cbind(dat$L1.AP, five_one_imp$L1.AP)
+L1.TR<-cbind(dat$L1.TR, five_one_imp$L1.TR)
+L3.AP<-cbind(dat$L3.AP, five_one_imp$L3.AP)
+L3.TR<-cbind(dat$L3.TR, five_one_imp$L3.TR)
+
+FL.Lkregone<-kappa2(FL.L)
+FL.Rkregone<-kappa2(FL.R)
+T1.APkregone<-kappa2(T1.AP)
+T1.TRkregone<-kappa2(T1.TR)
+T5.APkregone<-kappa2(T5.AP)
+T5.TRkregone<-kappa2(T5.TR)
+T10.APkregone<-kappa2(T10.AP)
+T10.TRkregone<-kappa2(T10.TR)
+L1.APkregone<-kappa2(L1.AP)
+L1.TRkregone<-kappa2(L1.TR)
+L3.APkregone<-kappa2(L3.AP)
+L3.TRkregone<-kappa2(L3.TR)
+
+FL.Ltauregone<-cor.test(dat$FL_L, five_one_imp$FL_L, method="kendall")
+FL.Rtauregone<-cor.test(dat$FL_R, five_one_imp$FL_R, method="kendall")
+T1.APtauregone<-cor.test(dat$T1.AP, five_one_imp$T1.AP, method="kendall")
+T1.TRtauregone<-cor.test(dat$T1.TR, five_one_imp$T1.TR, method="kendall")
+T5.APtauregone<-cor.test(dat$T5.AP, five_one_imp$T5.AP, method="kendall")
+T5.TRtauregone<-cor.test(dat$T5.TR, five_one_imp$T5.TR, method="kendall")
+T10.APtauregone<-cor.test(dat$T10.AP, five_one_imp$T10.AP, method="kendall")
+T10.TRtauregone<-cor.test(dat$T10.TR, five_one_imp$T10.TR, method="kendall")
+L1.APtauregone<-cor.test(dat$L1.AP, five_one_imp$L1.AP, method="kendall")
+L1.TRtauregone<-cor.test(dat$L1.TR, five_one_imp$L1.TR, method="kendall")
+L3.APtauregone<-cor.test(dat$L3.AP, five_one_imp$L3.AP, method="kendall")
+L3.TRtauregone<-cor.test(dat$L3.TR, five_one_imp$L3.TR, method="kendall")
+
+#TWO
+FL.L<-cbind(dat$FL_L, five_two_imp$FL_L)
+FL.R<-cbind(dat$FL_R, five_two_imp$FL_R)
+T1.AP<-cbind(dat$T1.AP, five_two_imp$T1.AP)
+T1.TR<-cbind(dat$T1.TR, five_two_imp$T1.TR)
+T5.AP<-cbind(dat$T5.AP, five_two_imp$T5.AP)
+T5.TR<-cbind(dat$T5.TR, five_two_imp$T5.TR)
+T10.AP<-cbind(dat$T10.AP, five_two_imp$T10.AP)
+T10.TR<-cbind(dat$T10.TR, five_two_imp$T10.TR)
+L1.AP<-cbind(dat$L1.AP, five_two_imp$L1.AP)
+L1.TR<-cbind(dat$L1.TR, five_two_imp$L1.TR)
+L3.AP<-cbind(dat$L3.AP, five_two_imp$L3.AP)
+L3.TR<-cbind(dat$L3.TR, five_two_imp$L3.TR)
+
+FL.Lkregtwo<-kappa2(FL.L)
+FL.Rkregtwo<-kappa2(FL.R)
+T1.APkregtwo<-kappa2(T1.AP)
+T1.TRkregtwo<-kappa2(T1.TR)
+T5.APkregtwo<-kappa2(T5.AP)
+T5.TRkregtwo<-kappa2(T5.TR)
+T10.APkregtwo<-kappa2(T10.AP)
+T10.TRkregtwo<-kappa2(T10.TR)
+L1.APkregtwo<-kappa2(L1.AP)
+L1.TRkregtwo<-kappa2(L1.TR)
+L3.APkregtwo<-kappa2(L3.AP)
+L3.TRkregtwo<-kappa2(L3.TR)
+
+FL.Ltauregtwo<-cor.test(dat$FL_L, five_two_imp$FL_L, method="kendall")
+FL.Rtauregtwo<-cor.test(dat$FL_R, five_two_imp$FL_R, method="kendall")
+T1.APtauregtwo<-cor.test(dat$T1.AP, five_two_imp$T1.AP, method="kendall")
+T1.TRtauregtwo<-cor.test(dat$T1.TR, five_two_imp$T1.TR, method="kendall")
+T5.APtauregtwo<-cor.test(dat$T5.AP, five_two_imp$T5.AP, method="kendall")
+T5.TRtauregtwo<-cor.test(dat$T5.TR, five_two_imp$T5.TR, method="kendall")
+T10.APtauregtwo<-cor.test(dat$T10.AP, five_two_imp$T10.AP, method="kendall")
+T10.TRtauregtwo<-cor.test(dat$T10.TR, five_two_imp$T10.TR, method="kendall")
+L1.APtauregtwo<-cor.test(dat$L1.AP, five_two_imp$L1.AP, method="kendall")
+L1.TRtauregtwo<-cor.test(dat$L1.TR, five_two_imp$L1.TR, method="kendall")
+L3.APtauregtwo<-cor.test(dat$L3.AP, five_two_imp$L3.AP, method="kendall")
+L3.TRtauregtwo<-cor.test(dat$L3.TR, five_two_imp$L3.TR, method="kendall")
+
+#THREE
+FL.L<-cbind(dat$FL_L, five_three_imp$FL_L)
+FL.R<-cbind(dat$FL_R, five_three_imp$FL_R)
+T1.AP<-cbind(dat$T1.AP, five_three_imp$T1.AP)
+T1.TR<-cbind(dat$T1.TR, five_three_imp$T1.TR)
+T5.AP<-cbind(dat$T5.AP, five_three_imp$T5.AP)
+T5.TR<-cbind(dat$T5.TR, five_three_imp$T5.TR)
+T10.AP<-cbind(dat$T10.AP, five_three_imp$T10.AP)
+T10.TR<-cbind(dat$T10.TR, five_three_imp$T10.TR)
+L1.AP<-cbind(dat$L1.AP, five_three_imp$L1.AP)
+L1.TR<-cbind(dat$L1.TR, five_three_imp$L1.TR)
+L3.AP<-cbind(dat$L3.AP, five_three_imp$L3.AP)
+L3.TR<-cbind(dat$L3.TR, five_three_imp$L3.TR)
+
+FL.Lkregthree<-kappa2(FL.L)
+FL.Rkregthree<-kappa2(FL.R)
+T1.APkregthree<-kappa2(T1.AP)
+T1.TRkregthree<-kappa2(T1.TR)
+T5.APkregthree<-kappa2(T5.AP)
+T5.TRkregthree<-kappa2(T5.TR)
+T10.APkregthree<-kappa2(T10.AP)
+T10.TRkregthree<-kappa2(T10.TR)
+L1.APkregthree<-kappa2(L1.AP)
+L1.TRkregthree<-kappa2(L1.TR)
+L3.APkregthree<-kappa2(L3.AP)
+L3.TRkregthree<-kappa2(L3.TR)
+
+FL.Ltauregthree<-cor.test(dat$FL_L, five_three_imp$FL_L, method="kendall")
+FL.Rtauregthree<-cor.test(dat$FL_R, five_three_imp$FL_R, method="kendall")
+T1.APtauregthree<-cor.test(dat$T1.AP, five_three_imp$T1.AP, method="kendall")
+T1.TRtauregthree<-cor.test(dat$T1.TR, five_three_imp$T1.TR, method="kendall")
+T5.APtauregthree<-cor.test(dat$T5.AP, five_three_imp$T5.AP, method="kendall")
+T5.TRtauregthree<-cor.test(dat$T5.TR, five_three_imp$T5.TR, method="kendall")
+T10.APtauregthree<-cor.test(dat$T10.AP, five_three_imp$T10.AP, method="kendall")
+T10.TRtauregthree<-cor.test(dat$T10.TR, five_three_imp$T10.TR, method="kendall")
+L1.APtauregthree<-cor.test(dat$L1.AP, five_three_imp$L1.AP, method="kendall")
+L1.TRtauregthree<-cor.test(dat$L1.TR, five_three_imp$L1.TR, method="kendall")
+L3.APtauregthree<-cor.test(dat$L3.AP, five_three_imp$L3.AP, method="kendall")
+L3.TRtauregthree<-cor.test(dat$L3.TR, five_three_imp$L3.TR, method="kendall")
+
+#FOUR
+FL.L<-cbind(dat$FL_L, five_four_imp$FL_L)
+FL.R<-cbind(dat$FL_R, five_four_imp$FL_R)
+T1.AP<-cbind(dat$T1.AP, five_four_imp$T1.AP)
+T1.TR<-cbind(dat$T1.TR, five_four_imp$T1.TR)
+T5.AP<-cbind(dat$T5.AP, five_four_imp$T5.AP)
+T5.TR<-cbind(dat$T5.TR, five_four_imp$T5.TR)
+T10.AP<-cbind(dat$T10.AP, five_four_imp$T10.AP)
+T10.TR<-cbind(dat$T10.TR, five_four_imp$T10.TR)
+L1.AP<-cbind(dat$L1.AP, five_four_imp$L1.AP)
+L1.TR<-cbind(dat$L1.TR, five_four_imp$L1.TR)
+L3.AP<-cbind(dat$L3.AP, five_four_imp$L3.AP)
+L3.TR<-cbind(dat$L3.TR, five_four_imp$L3.TR)
+
+FL.Lkregfour<-kappa2(FL.L)
+FL.Rkregfour<-kappa2(FL.R)
+T1.APkregfour<-kappa2(T1.AP)
+T1.TRkregfour<-kappa2(T1.TR)
+T5.APkregfour<-kappa2(T5.AP)
+T5.TRkregfour<-kappa2(T5.TR)
+T10.APkregfour<-kappa2(T10.AP)
+T10.TRkregfour<-kappa2(T10.TR)
+L1.APkregfour<-kappa2(L1.AP)
+L1.TRkregfour<-kappa2(L1.TR)
+L3.APkregfour<-kappa2(L3.AP)
+L3.TRkregfour<-kappa2(L3.TR)
+
+FL.Ltauregfour<-cor.test(dat$FL_L, five_four_imp$FL_L, method="kendall")
+FL.Rtauregfour<-cor.test(dat$FL_R, five_four_imp$FL_R, method="kendall")
+T1.APtauregfour<-cor.test(dat$T1.AP, five_four_imp$T1.AP, method="kendall")
+T1.TRtauregfour<-cor.test(dat$T1.TR, five_four_imp$T1.TR, method="kendall")
+T5.APtauregfour<-cor.test(dat$T5.AP, five_four_imp$T5.AP, method="kendall")
+T5.TRtauregfour<-cor.test(dat$T5.TR, five_four_imp$T5.TR, method="kendall")
+T10.APtauregfour<-cor.test(dat$T10.AP, five_four_imp$T10.AP, method="kendall")
+T10.TRtauregfour<-cor.test(dat$T10.TR, five_four_imp$T10.TR, method="kendall")
+L1.APtauregfour<-cor.test(dat$L1.AP, five_four_imp$L1.AP, method="kendall")
+L1.TRtauregfour<-cor.test(dat$L1.TR, five_four_imp$L1.TR, method="kendall")
+L3.APtauregfour<-cor.test(dat$L3.AP, five_four_imp$L3.AP, method="kendall")
+L3.TRtauregfour<-cor.test(dat$L3.TR, five_four_imp$L3.TR, method="kendall")
+
+#FIVE
+FL.L<-cbind(dat$FL_L, five_five_imp$FL_L)
+FL.R<-cbind(dat$FL_R, five_five_imp$FL_R)
+T1.AP<-cbind(dat$T1.AP, five_five_imp$T1.AP)
+T1.TR<-cbind(dat$T1.TR, five_five_imp$T1.TR)
+T5.AP<-cbind(dat$T5.AP, five_five_imp$T5.AP)
+T5.TR<-cbind(dat$T5.TR, five_five_imp$T5.TR)
+T10.AP<-cbind(dat$T10.AP, five_five_imp$T10.AP)
+T10.TR<-cbind(dat$T10.TR, five_five_imp$T10.TR)
+L1.AP<-cbind(dat$L1.AP, five_five_imp$L1.AP)
+L1.TR<-cbind(dat$L1.TR, five_five_imp$L1.TR)
+L3.AP<-cbind(dat$L3.AP, five_five_imp$L3.AP)
+L3.TR<-cbind(dat$L3.TR, five_five_imp$L3.TR)
+
+FL.Lkregfive<-kappa2(FL.L)
+FL.Rkregfive<-kappa2(FL.R)
+T1.APkregfive<-kappa2(T1.AP)
+T1.TRkregfive<-kappa2(T1.TR)
+T5.APkregfive<-kappa2(T5.AP)
+T5.TRkregfive<-kappa2(T5.TR)
+T10.APkregfive<-kappa2(T10.AP)
+T10.TRkregfive<-kappa2(T10.TR)
+L1.APkregfive<-kappa2(L1.AP)
+L1.TRkregfive<-kappa2(L1.TR)
+L3.APkregfive<-kappa2(L3.AP)
+L3.TRkregfive<-kappa2(L3.TR)
+
+FL.Ltauregfive<-cor.test(dat$FL_L, five_five_imp$FL_L, method="kendall")
+FL.Rtauregfive<-cor.test(dat$FL_R, five_five_imp$FL_R, method="kendall")
+T1.APtauregfive<-cor.test(dat$T1.AP, five_five_imp$T1.AP, method="kendall")
+T1.TRtauregfive<-cor.test(dat$T1.TR, five_five_imp$T1.TR, method="kendall")
+T5.APtauregfive<-cor.test(dat$T5.AP, five_five_imp$T5.AP, method="kendall")
+T5.TRtauregfive<-cor.test(dat$T5.TR, five_five_imp$T5.TR, method="kendall")
+T10.APtauregfive<-cor.test(dat$T10.AP, five_five_imp$T10.AP, method="kendall")
+T10.TRtauregfive<-cor.test(dat$T10.TR, five_five_imp$T10.TR, method="kendall")
+L1.APtauregfive<-cor.test(dat$L1.AP, five_five_imp$L1.AP, method="kendall")
+L1.TRtauregfive<-cor.test(dat$L1.TR, five_five_imp$L1.TR, method="kendall")
+L3.APtauregfive<-cor.test(dat$L3.AP, five_five_imp$L3.AP, method="kendall")
+L3.TRtauregfive<-cor.test(dat$L3.TR, five_five_imp$L3.TR, method="kendall")
+
+#Now we combine the results from each of the 5 versions
+#This averages the means and variances across all 5 
+FL.Lmeanreg<-mean(FL.Lmeanreg.1, FL.Lmeanreg.2, FL.Lmeanreg.3, FL.Lmeanreg.4, FL.Lmeanreg.5)
+FL.Rmeanreg<-mean(FL.Rmeanreg.1, FL.Rmeanreg.2, FL.Rmeanreg.3, FL.Rmeanreg.4, FL.Rmeanreg.5)
+T1.APmeanreg<-mean(T1.APmeanreg.1, T1.APmeanreg.2, T1.APmeanreg.3, T1.APmeanreg.4, T1.APmeanreg.5)
+T1.TRmeanreg<-mean(T1.TRmeanreg.1, T1.TRmeanreg.2, T1.TRmeanreg.3, T1.TRmeanreg.4, T1.TRmeanreg.5)
+T5.APmeanreg<-mean(T5.APmeanreg.1, T5.APmeanreg.2, T5.APmeanreg.3, T5.APmeanreg.4, T5.APmeanreg.5)
+T5.TRmeanreg<-mean(T5.TRmeanreg.1, T5.TRmeanreg.2, T5.TRmeanreg.3, T5.TRmeanreg.4, T5.TRmeanreg.5)
+T10.APmeanreg<-mean(T10.APmeanreg.1, T10.APmeanreg.2, T10.APmeanreg.3, T10.APmeanreg.4, T10.APmeanreg.5)
+T10.TRmeanreg<-mean(T10.TRmeanreg.1, T10.TRmeanreg.2, T10.TRmeanreg.3, T10.TRmeanreg.4, T10.TRmeanreg.5)
+L1.APmeanreg<-mean(L1.APmeanreg.1, L1.APmeanreg.2, L1.APmeanreg.3, L1.APmeanreg.4, L1.APmeanreg.5)
+L1.TRmeanreg<-mean(L1.TRmeanreg.1, L1.TRmeanreg.2, L1.TRmeanreg.3, L1.TRmeanreg.4, L1.TRmeanreg.5)
+L3.APmeanreg<-mean(L3.APmeanreg.1, L3.APmeanreg.2, L3.APmeanreg.3, L3.APmeanreg.4, L3.APmeanreg.5)
+L3.TRmeanreg<-mean(L3.TRmeanreg.1, L3.TRmeanreg.2, L3.TRmeanreg.3, L3.TRmeanreg.4, L3.TRmeanreg.5)
+
+FL.Lvarreg<-mean(FL.Lvarreg.1, FL.Lvarreg.2, FL.Lvarreg.3, FL.Lvarreg.4, FL.Lvarreg.5)
+FL.Rvarreg<-mean(FL.Rvarreg.1, FL.Rvarreg.2, FL.Rvarreg.3, FL.Rvarreg.4, FL.Rvarreg.5)
+T1.APvarreg<-mean(T1.APvarreg.1, T1.APvarreg.2, T1.APvarreg.3, T1.APvarreg.4, T1.APvarreg.5)
+T1.TRvarreg<-mean(T1.TRvarreg.1, T1.TRvarreg.2, T1.TRvarreg.3, T1.TRvarreg.4, T1.TRvarreg.5)
+T5.APvarreg<-mean(T5.APvarreg.1, T5.APvarreg.2, T5.APvarreg.3, T5.APvarreg.4, T5.APvarreg.5)
+T5.TRvarreg<-mean(T5.TRvarreg.1, T5.TRvarreg.2, T5.TRvarreg.3, T5.TRvarreg.4, T5.TRvarreg.5)
+T10.APvarreg<-mean(T10.APvarreg.1, T10.APvarreg.2, T10.APvarreg.3, T10.APvarreg.4, T10.APvarreg.5)
+T10.TRvarreg<-mean(T10.TRvarreg.1, T10.TRvarreg.2, T10.TRvarreg.3, T10.TRvarreg.4, T10.TRvarreg.5)
+L1.APvarreg<-mean(L1.APvarreg.1, L1.APvarreg.2, L1.APvarreg.3, L1.APvarreg.4, L1.APvarreg.5)
+L1.TRvarreg<-mean(L1.TRvarreg.1, L1.TRvarreg.2, L1.TRvarreg.3, L1.TRvarreg.4, L1.TRvarreg.5)
+L3.APvarreg<-mean(L3.APvarreg.1, L3.APvarreg.2, L3.APvarreg.3, L3.APvarreg.4, L3.APvarreg.5)
+L3.TRvarreg<-mean(L3.TRvarreg.1, L3.TRvarreg.2, L3.TRvarreg.3, L3.TRvarreg.4, L3.TRvarreg.5)
+
+#Now we combine the results from each of the 5 versions
+#This averages the kappa and tau across all 5 
+FL.Lkreg<-mean(FL.Lkregone$value, FL.Lkregtwo$value, FL.Lkregthree$value, PFL.LPMMfour$value, FL.Lkregfive$value)
+FL.Rkreg<-mean(FL.Rkregone$value, FL.Rkregtwo$value, FL.Rkregthree$value, FL.Rkregfour$value, FL.Rkregfive$value)
+T1.APkreg<-mean(T1.APkregone$value, T1.APkregtwo$value,T1.APkregthree$value, T1.APkregfour$value, T1.APkregfive$value)
+T1.TRkreg<-mean(T1.TRkregone$value, T1.TRkregtwo$value,T1.TRkregthree$value, T1.TRkregfour$value, T1.TRkregfive$value)
+T5.APkreg<-mean(T5.APkregone$value, T5.APkregtwo$value,T5.APkregthree$value, T5.APkregfour$value, T5.APkregfive$value)
+T5.TRkreg<-mean(T5.TRkregone$value, T5.TRkregtwo$value,T5.TRkregthree$value, T5.TRkregfour$value, T5.TRkregfive$value)
+T10.APkreg<-mean(T10.APkregone$value, T10.APkregtwo$value,T10.APkregthree$value, T10.APkregfour$value, T10.APkregfive$value)
+T10.TRkreg<-mean(T10.TRkregone$value, T10.TRkregtwo$value,T10.TRkregthree$value, T10.TRkregfour$value, T10.TRkregfive$value)
+L1.APkreg<-mean(L1.APkregone$value, L1.APkregtwo$value,L1.APkregthree$value, L1.APkregfour$value, L1.APkregfive$value)
+L1.TRkreg<-mean(L1.TRkregone$value, L1.TRkregtwo$value,L1.TRkregthree$value, L1.TRkregfour$value, L1.TRkregfive$value)
+L3.APkreg<-mean(L3.APkregone$value, L3.APkregtwo$value,L3.APkregthree$value, L3.APkregfour$value, L3.APkregfive$value)
+L3.TRkreg<-mean(L3.TRkregone$value, L3.TRkregtwo$value,L3.TRkregthree$value, L3.TRkregfour$value, L3.TRkregfive$value)
+
+FL.Ltaureg<-mean(FL.Ltauregone$estimate, FL.Ltauregtwo$estimate, FL.Ltauregthree$estimate, PFL.LPMMfour$estimate, FL.Ltauregfive$estimate)
+FL.Rtaureg<-mean(FL.Rtauregone$estimate, FL.Rtauregtwo$estimate, FL.Rtauregthree$estimate, FL.Rtauregfour$estimate, FL.Rtauregfive$estimate)
+T1.APtaureg<-mean(T1.APtauregone$estimate, T1.APtauregtwo$estimate,T1.APtauregthree$estimate, T1.APtauregfour$estimate, T1.APtauregfive$estimate)
+T1.TRtaureg<-mean(T1.TRtauregone$estimate, T1.TRtauregtwo$estimate,T1.TRtauregthree$estimate, T1.TRtauregfour$estimate, T1.TRtauregfive$estimate)
+T5.APtaureg<-mean(T5.APtauregone$estimate, T5.APtauregtwo$estimate,T5.APtauregthree$estimate, T5.APtauregfour$estimate, T5.APtauregfive$estimate)
+T5.TRtaureg<-mean(T5.TRtauregone$estimate, T5.TRtauregtwo$estimate,T5.TRtauregthree$estimate, T5.TRtauregfour$estimate, T5.TRtauregfive$estimate)
+T10.APtaureg<-mean(T10.APtauregone$estimate, T10.APtauregtwo$estimate,T10.APtauregthree$estimate, T10.APtauregfour$estimate, T10.APtauregfive$estimate)
+T10.TRtaureg<-mean(T10.TRtauregone$estimate, T10.TRtauregtwo$estimate,T10.TRtauregthree$estimate, T10.TRtauregfour$estimate, T10.TRtauregfive$estimate)
+L1.APtaureg<-mean(L1.APtauregone$estimate, L1.APtauregtwo$estimate,L1.APtauregthree$estimate, L1.APtauregfour$estimate, L1.APtauregfive$estimate)
+L1.TRtaureg<-mean(L1.TRtauregone$estimate, L1.TRtauregtwo$estimate,L1.TRtauregthree$estimate, L1.TRtauregfour$estimate, L1.TRtauregfive$estimate)
+L3.APtaureg<-mean(L3.APtauregone$estimate, L3.APtauregtwo$estimate,L3.APtauregthree$estimate, L3.APtauregfour$estimate, L3.APtauregfive$estimate)
+L3.TRtaureg<-mean(L3.TRtauregone$estimate, L3.TRtauregtwo$estimate,L3.TRtauregthree$estimate, L3.TRtauregfour$estimate, L3.TRtauregfive$estimate)
+
+###################################
+#Calculate Percent Error and Export
+###################################
+
+#This final chunk calculates the %error between actual and observed (imputed) values for the mean and variance
+#Cohen's Kappa and Kendall's Tau produce the coefficient which shows the level of agreement
+#The matrix puts the values in a row or column and exports as a .csv
+
+ab<-c((abs((FL.Lmeanreg-FL.Ldatmean)/FL.Ldatmean)*100),(abs((FL.Rmeanreg-FL.Rdatmean)/FL.Rdatmean)*100),(abs((T1.APmeanreg-T1.APdatmean)/T1.APdatmean)*100),(abs((T1.TRmeanreg-T1.TRdatmean)/T1.TRdatmean)*100),(abs((T5.APmeanreg-T5.APdatmean)/T5.APdatmean)*100), (abs((T5.TRmeanreg-T5.TRdatmean)/T5.TRdatmean)*100), (abs((T10.APmeanreg-T10.APdatmean)/T10.APdatmean)*100), (abs((T10.TRmeanreg-T10.TRdatmean)/T10.TRdatmean)*100), (abs((L1.APmeanreg-L1.APdatmean)/L1.APdatmean)*100), (abs((L1.TRmeanreg-L1.TRdatmean)/L1.TRdatmean)*100), (abs((L3.APmeanreg-L3.APdatmean)/L3.APdatmean)*100), (abs((L3.TRmeanreg-L3.TRdatmean)/L3.TRdatmean)*100))
+
+ac<-c((abs((FL.Lvarreg-FL.Ldatvar)/FL.Ldatvar)*100),(abs((FL.Rvarreg-FL.Rdatvar)/FL.Rdatvar)*100),(abs((T1.APvarreg-T1.APdatvar)/T1.APdatvar)*100),(abs((T1.TRvarreg-T1.TRdatvar)/T1.TRdatvar)*100),(abs((T5.APvarreg-T5.APdatvar)/T5.APdatvar)*100), (abs((T5.TRvarreg-T5.TRdatvar)/T5.TRdatvar)*100), (abs((T10.APvarreg-T10.APdatvar)/T10.APdatvar)*100), (abs((T10.TRvarreg-T10.TRdatvar)/T10.TRdatvar)*100), (abs((L1.APvarreg-L1.APdatvar)/L1.APdatvar)*100), (abs((L1.TRvarreg-L1.TRdatvar)/L1.TRdatvar)*100), (abs((L3.APvarreg-L3.APdatvar)/L3.APdatvar)*100), (abs((L3.TRvarreg-L3.TRdatvar)/L3.TRdatvar)*100))
+
+ad<-matrix(c(FL.Lkreg, FL.Rkreg, T1.APkreg, T1.TRkreg, T5.APkreg, T5.TRkreg, T10.APkreg, T10.TRkreg, L1.APkreg, L1.TRkreg, L3.APkreg, L3.TRkreg), 12, 1)
+
+ae<-matrix(c(FL.Ltaureg, FL.Rtaureg, T1.APtaureg, T1.TRtaureg, T5.APtaureg, T5.TRtaureg, T10.APtaureg, T10.TRtaureg, L1.APtaureg, L1.TRtaureg, L3.APtaureg, L3.TRtaureg), 12, 1)
+
+dfreg<-data.frame(cbind(ab, ac, ad, ae))
+colnames(dfreg)<-c("mean", "var", "kappa", "tau")
+rownames(dfreg)<-c("FL.L", "FL.R", "T1.AP", "T1.TR", "T5.AP", "T5.TR", "T10.AP", "T10.TR", "L1.AP", "L1.TR", "L3.AP", "L3.TR")
+write.csv(dfreg, file="imputed_data.csv")
+
+#END

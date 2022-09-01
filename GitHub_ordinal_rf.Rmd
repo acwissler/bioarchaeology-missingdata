@@ -1,0 +1,348 @@
+####Random Forest Imputation of Ordinal variables####
+
+This example uses 5% missingness 
+
+Packages Required: 
+1) missMethods  https://cran.r-project.org/web/packages/missMethods/missMethods.pdf
+2) hydroGOF  https://cran.r-project.org/web/packages/hydroGOF/hydroGOF.pdf
+
+#STEP 1# Load packages and set working directory
+```{r}
+library(knitr)
+rm(list=ls())
+
+library(missForest)
+library(hydroGOF)
+
+setwd("C:/Users/Amanda Wissler/Documents/Spring 2022/Manuscripts/MIssing data II/R code/GitHub")
+```
+
+#STEP 2# Load the data
+
+*Practice.Ordinal.Dataset.csv* is the complete dataset - i.e. no missing data. The complete dataset is needed in order to evaluate the success of the imputation/deletion method
+
+*ord.five.1.practive.csv* is the first version of the complete dataset that has 5% of the values missing.
+*ord.five.2.practice.csv* is the second version of the complete dataset that has 5% of the values missing. Etc. Each of the 5 versions has different values missing.
+
+Having multiple versions ensures that the overall results are not due to random chance. Here, I chose 5 versions, but you could choose 3 or 10 or however many you want. 
+```{r}
+data<-read.csv("Practice.Ordinal.Dataset.csv", header=T)
+
+ord.five.1<-read.csv("ord.five.1.practice.csv", header=T)
+ord.five.2<-read.csv("ord.five.2.practice.csv", header=T)
+ord.five.3<-read.csv("ord.five.3.practice.csv", header=T)
+ord.five.4<-read.csv("ord.five.4.practice.csv", header=T)
+ord.five.5<-read.csv("ord.five.5.practice.csv", header=T)
+```
+
+#STEP 3# Impute the Data
+
+#Impute the data using missForest package
+*maxiter=10* refers to the maximum number of iterations to be performed
+*ntree=200* refers to the number of trees to grow
+*verbose=FALSE"* if TRUE more information is produced between each iteration
+*replace=TRUE* If 'TRUE' bootstrap sampling (with replacements) is performed
+*one1* = this is not the FINAL output so I name the output something temporary
+
+NOTE: If you are imputing ordinal paleopathology data that have a only a few possible values you will receive a string of error messages asking "The response has five or fewer unique values.  Are you sure you want to do regression?" The imputation will run anyway. 
+
+```{r}
+set.seed(0)
+one1<-missForest(ord.five.1, maxiter=10, ntree=200, verbose= FALSE, replace=TRUE)
+one2<-missForest(ord.five.1, maxiter=10, ntree=200, verbose= FALSE, replace=TRUE)
+one3<-missForest(ord.five.1, maxiter=10, ntree=200, verbose= FALSE, replace=TRUE)
+one4<-missForest(ord.five.1, maxiter=10, ntree=200, verbose= FALSE, replace=TRUE)
+one5<-missForest(ord.five.1, maxiter=10, ntree=200, verbose= FALSE, replace=TRUE)
+
+set.seed(1)
+two1<-missForest(ord.five.2, maxiter=10, ntree=200, verbose= FALSE, replace=TRUE)
+two2<-missForest(ord.five.2, maxiter=10, ntree=200, verbose= FALSE, replace=TRUE)
+two3<-missForest(ord.five.2, maxiter=10, ntree=200, verbose= FALSE, replace=TRUE)
+two4<-missForest(ord.five.2, maxiter=10, ntree=200, verbose= FALSE, replace=TRUE)
+two5<-missForest(ord.five.2, maxiter=10, ntree=200, verbose= FALSE, replace=TRUE)
+
+set.seed(2)
+three1<-missForest(ord.five.3, maxiter=10, ntree=200, verbose= FALSE, replace=TRUE)
+three2<-missForest(ord.five.3, maxiter=10, ntree=200, verbose= FALSE, replace=TRUE)
+three3<-missForest(ord.five.3, maxiter=10, ntree=200, verbose= FALSE, replace=TRUE)
+three4<-missForest(ord.five.3, maxiter=10, ntree=200, verbose= FALSE, replace=TRUE)
+three5<-missForest(ord.five.3, maxiter=10, ntree=200, verbose= FALSE, replace=TRUE)
+
+set.seed(3)
+four1<-missForest(ord.five.4, maxiter=10, ntree=200, verbose= FALSE, replace=TRUE)
+four2<-missForest(ord.five.4, maxiter=10, ntree=200, verbose= FALSE, replace=TRUE)
+four3<-missForest(ord.five.4, maxiter=10, ntree=200, verbose= FALSE, replace=TRUE)
+four4<-missForest(ord.five.4, maxiter=10, ntree=200, verbose= FALSE, replace=TRUE)
+four5<-missForest(ord.five.4, maxiter=10, ntree=200, verbose= FALSE, replace=TRUE)
+
+set.seed(4)
+five1<-missForest(ord.five.5, maxiter=10, ntree=200, verbose= FALSE, replace=TRUE)
+five2<-missForest(ord.five.5, maxiter=10, ntree=200, verbose= FALSE, replace=TRUE)
+five3<-missForest(ord.five.5, maxiter=10, ntree=200, verbose= FALSE, replace=TRUE)
+five4<-missForest(ord.five.5, maxiter=10, ntree=200, verbose= FALSE, replace=TRUE)
+five5<-missForest(ord.five.5, maxiter=10, ntree=200, verbose= FALSE, replace=TRUE)
+```
+
+Extract the completed dataframes from the list
+```{r}
+one_imp1<-one1$ximp
+one_imp2<-one2$ximp
+one_imp3<-one3$ximp
+one_imp4<-one4$ximp
+one_imp5<-one5$ximp
+
+two_imp1<-two1$ximp
+two_imp2<-two2$ximp
+two_imp3<-two3$ximp
+two_imp4<-two4$ximp
+two_imp5<-two5$ximp
+
+three_imp1<-three1$ximp
+three_imp2<-three2$ximp
+three_imp3<-three3$ximp
+three_imp4<-three4$ximp
+three_imp5<-three5$ximp
+
+four_imp1<-four1$ximp
+four_imp2<-four2$ximp
+four_imp3<-four3$ximp
+four_imp4<-four4$ximp
+four_imp5<-four5$ximp
+
+five_imp1<-five1$ximp
+five_imp2<-five2$ximp
+five_imp3<-five3$ximp
+five_imp4<-five4$ximp
+five_imp5<-five5$ximp
+```
+
+#STEP 4# Pool Dataset
+
+Step 3 created 5 different versions of data for each dataset.
+Now we have to average those together to creat a single version of each of the 5 datasets
+Then round the values to a single integer so they match standard ordinal paleopathology data
+
+NOTE: that if this were imputing values for a real analysis, the results would be pooled at the very end according to Rubin's Rules
+
+```{r}
+five_one_imp <- as.data.frame((one_imp1 + one_imp2 + one_imp3 + one_imp4 + one_imp5)/5)
+five_one_imp<-round(five_one_imp, digits=0)
+
+five_two_imp <- as.data.frame((two_imp1 + two_imp2 + two_imp3 + two_imp4 + two_imp5)/5)
+five_two_imp<-round(five_two_imp, digits=0)
+
+five_three_imp <- as.data.frame((three_imp1 + three_imp2 + three_imp3 + three_imp4 + three_imp5)/5)
+five_three_imp<-round(five_three_imp, digits=0)
+
+five_four_imp <- as.data.frame((four_imp1 + four_imp2 + four_imp3 + four_imp4 + four_imp5)/5)
+five_four_imp<-round(five_four_imp, digits=0)
+
+five_five_imp <- as.data.frame((five_imp1 + five_imp2 + five_imp3 + five_imp4 + five_imp5)/5)
+five_five_imp<-round(five_five_imp, digits=0)
+```
+
+#STEP 5# Calculate Success Parameters
+Now that we have created 5 imputed datasets, we must assess how close the imputed values are to the original dataset
+
+**Calculate Percent Error**
+
+Here we establish the variable means for the complete dataset so we can calculate the percent error by variable at the end
+```{r}
+PHdatmean<-mean(data$PH)
+COdatmean<-mean(data$CO)
+PDdatmean<-mean(data$PD)
+LEHdatmean<-mean(data$LEH)
+periostosisdatmean<-mean(data$periostosis)
+```
+
+*Prepare Data to calculate Percent Error*
+We must combine the means across each of the 5 versions by variable so that we produce a single percent error for each variable at the end. 
+```{r}
+PH.mean.imp<-mean(c(five_one_imp$PH, five_two_imp$PH, five_three_imp$PH, five_four_imp$PH, five_five_imp$PH))
+CO.mean.imp<-mean(c(five_one_imp$CO, five_two_imp$CO, five_three_imp$CO, five_four_imp$CO, five_five_imp$CO))
+PD.mean.imp<-mean(c(five_one_imp$PD, five_two_imp$PD, five_three_imp$PD, five_four_imp$PD, five_five_imp$PD))
+LEH.mean.imp<-mean(c(five_one_imp$LEH, five_two_imp$LEH, five_three_imp$LEH, five_four_imp$LEH, five_five_imp$LEH))
+periostosis.mean.imp<-mean(c(five_one_imp$periostosis, five_two_imp$periostosis, five_three_imp$periostosis, five_four_imp$periostosis, five_five_imp$periostosis))
+```
+
+Percent error is the absolute value of the observed value minus the expected value divided by the expected, all multiplied by 100
+```{r}
+ab<-c((abs((PH.mean.imp-PHdatmean)/PHdatmean)*100),(abs((CO.mean.imp-COdatmean)/COdatmean)*100),(abs((PD.mean.imp-PDdatmean)/PDdatmean)*100),(abs((LEH.mean.imp-LEHdatmean)/LEHdatmean)*100),(abs((periostosis.mean.imp-periostosisdatmean)/periostosisdatmean)*100))
+
+write.csv(ab, file="PE.ord.rf.practice.csv")
+```
+
+**Calculate Normalized Root Mean Square Error (NRMSE)**
+
+Both Practice.Ordinal.Dataset.csv and the 5 imputed datasets contain values that are 0s. However, NRMSE cannot be calculated when any of the values are 0. Therefore, we add 1 to every cell in the Practice.Ordinal.Dataset.csv and all the 5 imputed datasets. 
+```{r}
+data<-data+1
+five_one_imp<-five_one_imp+1
+five_two_imp<-five_two_imp+1
+five_three_imp<-five_three_imp+1
+five_four_imp<-five_four_imp+1
+five_five_imp<-five_five_imp+1
+```
+
+Use hydroGOF package to assess NRMSE between observed and simulated values for each of the 5 versions of the imputed datasets
+
+#five_one_imp
+```{r}
+obsA<-c(data$PH)
+simA<-c(five_one_imp$PH)
+dfA<-as.data.frame(t(gof(sim=simA, obs=obsA)))
+A<-dfA$`NRMSE %`
+
+obsB<-c(data$CO)
+simB<-c(five_one_imp$CO)
+dfB<-as.data.frame(t(gof(sim=simB, obs=obsB)))
+B<-dfB$`NRMSE %`
+
+obsC<-c(data$PD)
+simC<-c(five_one_imp$PD)
+dfC<-as.data.frame(t(gof(sim=simC, obs=obsC)))
+C<-dfC$`NRMSE %`
+
+obsD<-c(data$LEH)
+simD<-c(five_one_imp$LEH)
+dfD<-as.data.frame(t(gof(sim=simD, obs=obsD)))
+D<-dfD$`NRMSE %`
+
+obsE<-c(data$periostosis)
+simE<-c(five_one_imp$periostosis)
+dfE<-as.data.frame(t(gof(sim=simE, obs=obsE)))
+E<-dfE$`NRMSE %`
+
+
+```
+
+#five_two_imp
+```{r}
+obsAA<-c(data$PH)
+simAA<-c(five_two_imp$PH)
+dfAA<-as.data.frame(t(gof(sim=simAA, obs=obsAA)))
+AA<-dfAA$`NRMSE %`
+
+obsBB<-c(data$CO)
+simBB<-c(five_two_imp$CO)
+dfBB<-as.data.frame(t(gof(sim=simBB, obs=obsBB)))
+BB<-dfBB$`NRMSE %`
+
+obsCC<-c(data$PD)
+simCC<-c(five_two_imp$PD)
+dfCC<-as.data.frame(t(gof(sim=simCC, obs=obsCC)))
+CC<-dfCC$`NRMSE %`
+
+obsDD<-c(data$LEH)
+simDD<-c(five_two_imp$LEH)
+dfDD<-as.data.frame(t(gof(sim=simDD, obs=obsDD)))
+DD<-dfDD$`NRMSE %`
+
+obsEE<-c(data$periostosis)
+simEE<-c(five_two_imp$periostosis)
+dfEE<-as.data.frame(t(gof(sim=simEE, obs=obsEE)))
+EE<-dfEE$`NRMSE %`
+```
+
+#five_three_imp
+```{r}
+obsAAA<-c(data$PH)
+simAAA<-c(five_three_imp$PH)
+dfAAA<-as.data.frame(t(gof(sim=simAAA, obs=obsAAA)))
+AAA<-dfAAA$`NRMSE %`
+
+obsBBB<-c(data$CO)
+simBBB<-c(five_three_imp$CO)
+dfBBB<-as.data.frame(t(gof(sim=simBBB, obs=obsBBB)))
+BBB<-dfBBB$`NRMSE %`
+
+obsCCC<-c(data$PD)
+simCCC<-c(five_three_imp$PD)
+dfCCC<-as.data.frame(t(gof(sim=simCCC, obs=obsCCC)))
+CCC<-dfCCC$`NRMSE %`
+
+obsDDD<-c(data$LEH)
+simDDD<-c(five_three_imp$LEH)
+dfDDD<-as.data.frame(t(gof(sim=simDDD, obs=obsDDD)))
+DDD<-dfDDD$`NRMSE %`
+
+obsEEE<-c(data$periostosis)
+simEEE<-c(five_three_imp$periostosis)
+dfEEE<-as.data.frame(t(gof(sim=simEEE, obs=obsEEE)))
+EEE<-dfEEE$`NRMSE %`
+```
+
+#five_four_imp
+```{r}
+obsAAAA<-c(data$PH)
+simAAAA<-c(five_four_imp$PH)
+dfAAAA<-as.data.frame(t(gof(sim=simAAAA, obs=obsAAAA)))
+AAAA<-dfAAAA$`NRMSE %`
+
+obsBBBB<-c(data$CO)
+simBBBB<-c(five_four_imp$CO)
+dfBBBB<-as.data.frame(t(gof(sim=simBBBB, obs=obsBBBB)))
+BBBB<-dfBBBB$`NRMSE %`
+
+obsCCCC<-c(data$PD)
+simCCCC<-c(five_four_imp$PD)
+dfCCCC<-as.data.frame(t(gof(sim=simCCCC, obs=obsCCCC)))
+CCCC<-dfCCCC$`NRMSE %`
+
+obsDDDD<-c(data$LEH)
+simDDDD<-c(five_four_imp$LEH)
+dfDDDD<-as.data.frame(t(gof(sim=simDDDD, obs=obsDDDD)))
+DDDD<-dfDDDD$`NRMSE %`
+
+obsEEEE<-c(data$periostosis)
+simEEEE<-c(five_four_imp$periostosis)
+dfEEEE<-as.data.frame(t(gof(sim=simEEEE, obs=obsEEEE)))
+EEEE<-dfEEEE$`NRMSE %`
+
+```
+
+#five_five_imp
+```{r}
+obsAAAAA<-c(data$PH)
+simAAAAA<-c(five_five_imp$PH)
+dfAAAAA<-as.data.frame(t(gof(sim=simAAAAA, obs=obsAAAAA)))
+AAAAA<-dfAAAAA$`NRMSE %`
+
+obsBBBBB<-c(data$CO)
+simBBBBB<-c(five_five_imp$CO)
+dfBBBBB<-as.data.frame(t(gof(sim=simBBBBB, obs=obsBBBBB)))
+BBBBB<-dfBBBBB$`NRMSE %`
+
+obsCCCCC<-c(data$PD)
+simCCCCC<-c(five_five_imp$PD)
+dfCCCCC<-as.data.frame(t(gof(sim=simCCCCC, obs=obsCCCCC)))
+CCCCC<-dfCCCCC$`NRMSE %`
+
+obsDDDDD<-c(data$LEH)
+simDDDDD<-c(five_five_imp$LEH)
+dfDDDDD<-as.data.frame(t(gof(sim=simDDDDD, obs=obsDDDDD)))
+DDDDD<-dfDDDDD$`NRMSE %`
+
+obsEEEEE<-c(data$periostosis)
+simEEEEE<-c(five_five_imp$periostosis)
+dfEEEEE<-as.data.frame(t(gof(sim=simEEEEE, obs=obsEEEEE)))
+EEEEE<-dfEEEEE$`NRMSE %`
+```
+
+Put each NRMSE into a matrix to create a usable dataframe that can be exported to Excel
+```{r}
+aa<-matrix(c(A, B, C, D, E), 1, 5)
+
+ab<-matrix(c(AA, BB, CC, DD, EE), 1, 5)
+
+ac<-matrix(c(AAA, BBB, CCC, DDD, EEE), 1, 5)
+
+ad<-matrix(c(AAAA, BBBB, CCCC, DDDD, EEEE), 1, 5)
+
+ae<-matrix(c(AAAAA, BBBBB, CCCCC, DDDDD, EEEEE), 1, 5)
+
+df.ord.rf<-data.frame(rbind(aa, ab, ac, ad, ae))
+colnames(df.ord.rf)<-c("PH", "CO", "PD", "LEH", "periostosis")
+rownames(df.ord.rf)<-c("five_one_imp", "five_two_imp", "five_three_imp", "five_four_imp", "five_five_imp")
+write.csv(df.ord.rf, file="nrmse.ordinal.rf.practice.csv")
+```

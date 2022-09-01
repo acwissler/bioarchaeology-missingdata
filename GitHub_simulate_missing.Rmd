@@ -1,0 +1,76 @@
+#####Simulating missing values in continuous and ordinal datasets####
+
+#This code creates all the ordinal and continuous datasets with missing percentages of data
+```{r}
+rm(list=ls())
+library(knitr)
+library(imputeR)
+
+setwd("C:/Users/Amanda Wissler/Documents/Spring 2022/Manuscripts/MIssing data II/R code/GitHub")
+data.ordinal<-read.csv("Practice.Ordinal.Dataset.csv", header=T)
+```
+
+
+#Simulate 5% missingness into ordinal dataset using ImputeR "SimIm" function
+```{r}
+set.seed(1)
+ord.five.1<-SimIm(data.ordinal, p=0.05)
+ord.five.2<-SimIm(data.ordinal, p=0.05)
+ord.five.3<-SimIm(data.ordinal, p=0.05)
+ord.five.4<-SimIm(data.ordinal, p=0.05)
+ord.five.5<-SimIm(data.ordinal, p=0.05)
+```
+
+
+#SimIM doesn't keep the row names so we have to add them back and export as .csv
+#For 5% missingness
+```{r}
+colnames(ord.five.1)<-c("PH", "CO", "PD", "LEH", "periostosis")
+write.csv(ord.five.1, file="ord.five.1.practice.csv")
+
+colnames(ord.five.2)<-c("PH", "CO", "PD", "LEH", "periostosis")
+write.csv(ord.five.2, file="ord.five.2.practice.csv")
+
+colnames(ord.five.3)<-c("PH", "CO", "PD", "LEH", "periostosis")
+write.csv(ord.five.3, file="ord.five.3.practice.csv")
+
+colnames(ord.five.4)<-c("PH", "CO", "PD", "LEH", "periostosis")
+write.csv(ord.five.4, file="ord.five.4.practice.csv")
+
+colnames(ord.five.5)<-c("PH", "CO", "PD", "LEH", "periostosis")
+write.csv(ord.five.5, file="ord.five.5.practice.csv")
+```
+
+
+#####Continous Data####
+
+```{r}
+data.continuous<-read.csv("Practice.Continuous.Dataset.csv", header=T)
+```
+
+#Simulate 5% missingness into ordinal dataset using ImputeR "SimIm" function
+```{r}
+set.seed(1)
+cont.five.1<-SimIm(data.continuous, p=0.05)
+cont.five.2<-SimIm(data.continuous, p=0.05)
+cont.five.3<-SimIm(data.continuous, p=0.05)
+cont.five.4<-SimIm(data.continuous, p=0.05)
+cont.five.5<-SimIm(data.continuous, p=0.05)
+```
+
+```{r}
+colnames(cont.five.1)<-c("FL.L", "FL.R", "T1.AP", "T1.TR", "T5.AP", "T5.TR", "T10.AP", "T10.TR", "L1.AP", "L1.TR", "L3.AP", "L3.TR")
+write.csv(cont.five.1, file="cont.five.1.practice.csv")
+
+colnames(cont.five.2)<-c("FL.L", "FL.R", "T1.AP", "T1.TR", "T5.AP", "T5.TR", "T10.AP", "T10.TR", "L1.AP", "L1.TR", "L3.AP", "L3.TR")
+write.csv(cont.five.2, file="cont.five.2.practice.csv")
+
+colnames(cont.five.3)<-c("FL.L", "FL.R", "T1.AP", "T1.TR", "T5.AP", "T5.TR", "T10.AP", "T10.TR", "L1.AP", "L1.TR", "L3.AP", "L3.TR")
+write.csv(cont.five.3, file="cont.five.3.practice.csv")
+
+colnames(cont.five.4)<-c("FL.L", "FL.R", "T1.AP", "T1.TR", "T5.AP", "T5.TR", "T10.AP", "T10.TR", "L1.AP", "L1.TR", "L3.AP", "L3.TR")
+write.csv(cont.five.4, file="cont.five.4.practice.csv")
+
+colnames(cont.five.5)<-c("FL.L", "FL.R", "T1.AP", "T1.TR", "T5.AP", "T5.TR", "T10.AP", "T10.TR", "L1.AP", "L1.TR", "L3.AP", "L3.TR")
+write.csv(cont.five.5, file="cont.five.5.practice.csv")
+```

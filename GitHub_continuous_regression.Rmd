@@ -1,0 +1,519 @@
+####Regression Imputation of Continuous variables####
+
+This example uses 5% missingness 
+
+Packages Required: 
+1) mice  https://cran.r-project.org/web/packages/mice/mice.pdf
+2) hydroGOF  https://cran.r-project.org/web/packages/hydroGOF/hydroGOF.pdf
+
+#STEP 1# Load packages and set working directory
+```{r}
+library(knitr)
+rm(list=ls())
+
+library(mice)
+library(hydroGOF)
+
+setwd("C:/Users/Amanda Wissler/Documents/Spring 2022/Manuscripts/MIssing data II/R code/GitHub")
+```
+
+#STEP 2# Load the data
+
+*continuousdata.csv* is the complete dataset - i.e. no missing data. The complete dataset is needed in order to evaluate the success of the imputation/deletion method
+
+*cont.five.1* is the first version of the complete dataset that has 5% of the values missing.
+*cont.five.2* is the second version of the complete dataset that has 5% of the values missing. Etc. Each of the 5 versions has different values missing.
+
+Having multiple versions ensures that the overall results are not due to random chance. Here, I chose 5 versions, but you could choose 3 or 10 or however many you want. 
+```{r}
+data<-read.csv("Practice.Continuous.Dataset.csv", header=T)
+
+cont.five.1<-read.csv("cont.five.1.practice.csv", header=T)
+cont.five.2<-read.csv("cont.five.2.practice.csv", header=T)
+cont.five.3<-read.csv("cont.five.3.practice.csv", header=T)
+cont.five.4<-read.csv("cont.five.4.practice.csv", header=T)
+cont.five.5<-read.csv("cont.five.5.practice.csv", header=T)
+```
+
+#STEP 3# Impute the Data
+
+#Impute the data using MICE package
+*m=10* refers to how many different datasets we are going to create when we impute. *Multiple* imputation specifically calls for the creation of multiple imputed datasets to incorporate uncertainty of the imputed values. Usually you want to do at least 5-10. Each will have different imputed values
+*maxit=50* refers to the number of iterations R will go through to create one of the M=3 datasets. I usually set it to maxit=50 but in the interest of speed we are doing 10
+*method="norm.nob"* sets the code for regression imputation
+*seed=1* is the starting number R will start at to run the iterations. If you don't set a seed # you will get a slightly different output each time. I picked 1 because that is in the range of what my data look like. 
+*tempdata* = this is not the FINAL output so I name the output something temporary
+```{r}
+tempdata.five.1<-mice(cont.five.1, m=10, maxit=50, method="norm.nob", seed=1)
+tempdata.five.2<-mice(cont.five.2, m=10, maxit=50, method="norm.nob", seed=1)
+tempdata.five.3<-mice(cont.five.3, m=10, maxit=50, method="norm.nob", seed=1)
+tempdata.five.4<-mice(cont.five.4, m=10, maxit=50, method="norm.nob", seed=1)
+tempdata.five.5<-mice(cont.five.5, m=10, maxit=50, method="norm.nob", seed=1)
+```
+
+#STEP 4# Pool Dataset
+Each of the m=10 versions of the dataset must now be pooled, creating 5 datasets that incorporate the variability in values
+NOTE: that if this were imputing values for a real analysis, the results would be pooled at the very end according to Rubin's Rules
+
+Pool Dataset 1
+```{r}
+one1<-complete(tempdata.five.1,1)
+two1<-complete(tempdata.five.1,2)
+three1<-complete(tempdata.five.1,3)
+four1<-complete(tempdata.five.1,4)
+five1<-complete(tempdata.five.1,5)  
+six1<-complete(tempdata.five.1,6) 
+seven1<-complete(tempdata.five.1,7) 
+eight1<-complete(tempdata.five.1,8) 
+nine1<-complete(tempdata.five.1,9) 
+ten1<-complete(tempdata.five.1,10)
+
+five_one_imp<-(one1 + two1 + three1 + four1 + five1 + six1 + seven1 + eight1 + nine1 + ten1)/10
+```
+
+Pool Dataset 2
+```{r}
+one2<-complete(tempdata.five.2,1)
+two2<-complete(tempdata.five.2,2)
+three2<-complete(tempdata.five.2,3)
+four2<-complete(tempdata.five.2,4)
+five2<-complete(tempdata.five.2,5)
+six2<-complete(tempdata.five.2,6) 
+seven2<-complete(tempdata.five.2,7) 
+eight2<-complete(tempdata.five.2,8) 
+nine2<-complete(tempdata.five.2,9) 
+ten2<-complete(tempdata.five.2,10)
+
+five_two_imp<-(one2 + two2 + three2 + four2 + five2 + six2 + seven2 + eight2 + nine2 + ten2)/10
+```
+
+Pool Dataset 3
+```{r}
+one3<-complete(tempdata.five.3,1)
+two3<-complete(tempdata.five.3,2)
+three3<-complete(tempdata.five.3,3)
+four3<-complete(tempdata.five.3,4)
+five3<-complete(tempdata.five.3,5)  
+six3<-complete(tempdata.five.3,6) 
+seven3<-complete(tempdata.five.3,7) 
+eight3<-complete(tempdata.five.3,8) 
+nine3<-complete(tempdata.five.3,9) 
+ten3<-complete(tempdata.five.3,10)
+
+five_three_imp<-(one3 + two3 + three3 + four3 + five3 + six3 + seven3 + eight3 + nine3 + ten3)/10
+```
+
+Pool Dataset 4
+```{r}
+one4<-complete(tempdata.five.4,1)
+two4<-complete(tempdata.five.4,2)
+three4<-complete(tempdata.five.4,3)
+four4<-complete(tempdata.five.4,4)
+five4<-complete(tempdata.five.4,5)  
+six4<-complete(tempdata.five.4,6) 
+seven4<-complete(tempdata.five.4,7) 
+eight4<-complete(tempdata.five.4,8) 
+nine4<-complete(tempdata.five.4,9) 
+ten4<-complete(tempdata.five.4,10)
+
+five_four_imp<-(one4 + two4 + three4 + four4 + five4 + six4 + seven4 + eight4 + nine4 + ten4)/10
+```
+
+Pool Dataset 5
+```{r}
+one5<-complete(tempdata.five.5,1)
+two5<-complete(tempdata.five.5,2)
+three5<-complete(tempdata.five.5,3)
+four5<-complete(tempdata.five.5,4)
+five5<-complete(tempdata.five.5,5) 
+six5<-complete(tempdata.five.5,6) 
+seven5<-complete(tempdata.five.5,7) 
+eight5<-complete(tempdata.five.5,8) 
+nine5<-complete(tempdata.five.5,9) 
+ten5<-complete(tempdata.five.5,10)
+
+five_five_imp<-(one5 + two5 + three5 + four5 + five5 + six5 + seven5 + eight5 + nine5 + ten5)/10
+```
+
+#STEP 5# Calculate Success Parameters
+Now that we have created 5 imputed datasets, we must assess how close the imputed values are to the original dataset
+
+**Calculate Percent Error**
+
+Here we establish the variable means for the complete dataset so we can calculate the percent error by variable at the end
+```{r}
+FL.Ldatmean<-mean(data$FL.Left)
+FL.Rdatmean<-mean(data$FL.Right)
+T1.APdatmean<-mean(data$T1.AP)
+T1.TRdatmean<-mean(data$T1.TR)
+T5.APdatmean<-mean(data$T5.AP)
+T5.TRdatmean<-mean(data$T5.TR)
+T10.APdatmean<-mean(data$T10.AP)
+T10.TRdatmean<-mean(data$T10.TR)
+L1.APdatmean<-mean(data$L1.AP)
+L1.TRdatmean<-mean(data$L1.TR)
+L3.APdatmean<-mean(data$L3.AP)
+L3.TRdatmean<-mean(data$L3.TR)
+```
+
+*Prepare Data to calculate Percent Error*
+We must combine the means across each of the 5 versions by variable so that we produce a single percent error for each variable at the end. 
+```{r}
+FL.L.mean.imp<-mean(c(five_one_imp$FL.Left, five_two_imp$FL.Left, five_three_imp$FL.Left, five_four_imp$FL.Left, five_five_imp$FL.Left))
+FL.R.mean.imp<-mean(c(five_one_imp$FL.Right, five_two_imp$FL.Right, five_three_imp$FL.Right, five_four_imp$FL.Right, five_five_imp$FL.Right))
+T1.AP.mean.imp<-mean(c(five_one_imp$T1.AP, five_two_imp$T1.AP, five_three_imp$T1.AP, five_four_imp$T1.AP, five_five_imp$T1.AP))
+T1.TR.mean.imp<-mean(c(five_one_imp$T1.TR, five_two_imp$T1.TR, five_three_imp$T1.TR, five_four_imp$T1.TR, five_five_imp$T1.TR))
+T5.AP.mean.imp<-mean(c(five_one_imp$T5.AP, five_two_imp$T5.AP, five_three_imp$T5.AP, five_four_imp$T5.AP, five_five_imp$T5.AP))
+T5.TR.mean.imp<-mean(c(five_one_imp$T5.TR, five_two_imp$T5.TR, five_three_imp$T5.TR, five_four_imp$T5.TR, five_five_imp$T5.TR))
+T10.AP.mean.imp<-mean(c(five_one_imp$T10.AP, five_two_imp$T10.AP, five_three_imp$T10.AP, five_four_imp$T10.AP, five_five_imp$T10.AP))
+T10.TR.mean.imp<-mean(c(five_one_imp$T10.TR, five_two_imp$T10.TR, five_three_imp$T10.TR, five_four_imp$T10.TR, five_five_imp$T10.TR))
+L1.AP.mean.imp<-mean(c(five_one_imp$L1.AP, five_two_imp$L1.AP, five_three_imp$L1.AP, five_four_imp$L1.AP, five_five_imp$L1.AP))
+L1.TR.mean.imp<-mean(c(five_one_imp$L1.TR, five_two_imp$L1.TR, five_three_imp$L1.TR, five_four_imp$L1.TR, five_five_imp$L1.TR))
+L3.AP.mean.imp<-mean(c(five_one_imp$L3.AP, five_two_imp$L3.AP, five_three_imp$L3.AP, five_four_imp$L3.AP, five_five_imp$L3.AP))
+L3.TR.mean.imp<-mean(c(five_one_imp$L3.TR, five_two_imp$L3.TR, five_three_imp$L3.TR, five_four_imp$L3.TR, five_five_imp$L3.TR))
+```
+
+Percent error is the absolute value of the observed value minus the expected value divided by the expected, all multiplied by 100
+```{r}
+ab<-c((abs((FL.L.mean.imp-FL.Ldatmean)/FL.Ldatmean)*100),(abs((FL.R.mean.imp-FL.Rdatmean)/FL.Rdatmean)*100),(abs((T1.AP.mean.imp-T1.APdatmean)/T1.APdatmean)*100),(abs((T1.TR.mean.imp-T1.TRdatmean)/T1.TRdatmean)*100),(abs((T5.AP.mean.imp-T5.APdatmean)/T5.APdatmean)*100), (abs((T5.TR.mean.imp-T5.TRdatmean)/T5.TRdatmean)*100), (abs((T10.AP.mean.imp-T10.APdatmean)/T10.APdatmean)*100), (abs((T10.TR.mean.imp-T10.TRdatmean)/T10.TRdatmean)*100), (abs((L1.AP.mean.imp-L1.APdatmean)/L1.APdatmean)*100), (abs((L1.TR.mean.imp-L1.TRdatmean)/L1.TRdatmean)*100), (abs((L3.AP.mean.imp-L3.APdatmean)/L3.APdatmean)*100), (abs((L3.TR.mean.imp-L3.TRdatmean)/L3.TRdatmean)*100))
+
+write.csv(ab, file="PE.cont.reg.csv")
+```
+
+
+**Calculate Normalized Root Mean Square Error (NRMSE)**
+
+Use hydroGOF package to assess NRMSE between observed and simulated values for each of the 5 versions of the imputed datasets
+
+#five_one_imp
+```{r}
+obsA<-c(data$FL.Left)
+simA<-c(five_one_imp$FL.Left)
+dfA<-as.data.frame(t(gof(sim=simA, obs=obsA)))
+A<-dfA$`NRMSE %`
+
+obsB<-c(data$FL.Right)
+simB<-c(five_one_imp$FL.Right)
+dfB<-as.data.frame(t(gof(sim=simB, obs=obsB)))
+B<-dfB$`NRMSE %`
+
+obsC<-c(data$T1.AP)
+simC<-c(five_one_imp$T1.AP)
+dfC<-as.data.frame(t(gof(sim=simC, obs=obsC)))
+C<-dfC$`NRMSE %`
+
+obsD<-c(data$T1.TR)
+simD<-c(five_one_imp$T1.TR)
+dfD<-as.data.frame(t(gof(sim=simD, obs=obsD)))
+D<-dfD$`NRMSE %`
+
+obsE<-c(data$T5.AP)
+simE<-c(five_one_imp$T5.AP)
+dfE<-as.data.frame(t(gof(sim=simE, obs=obsE)))
+E<-dfE$`NRMSE %`
+
+obsF<-c(data$T5.TR)
+simF<-c(five_one_imp$T5.TR)
+dfF<-as.data.frame(t(gof(sim=simF, obs=obsF)))
+F<-dfF$`NRMSE %`
+
+obsG<-c(data$T10.AP)
+simG<-c(five_one_imp$T10.AP)
+dfG<-as.data.frame(t(gof(sim=simG, obs=obsG)))
+G<-dfG$`NRMSE %`
+
+obsH<-c(data$T10.TR)
+simH<-c(five_one_imp$T10.TR)
+dfH<-as.data.frame(t(gof(sim=simH, obs=obsH)))
+H<-dfH$`NRMSE %`
+
+obsI<-c(data$L1.AP)
+simI<-c(five_one_imp$L1.AP)
+dfI<-as.data.frame(t(gof(sim=simI, obs=obsI)))
+I<-dfI$`NRMSE %`
+
+obsJ<-c(data$L1.TR)
+simJ<-c(five_one_imp$L1.TR)
+dfJ<-as.data.frame(t(gof(sim=simJ, obs=obsJ)))
+J<-dfJ$`NRMSE %`
+
+obsK<-c(data$L3.AP)
+simK<-c(five_one_imp$L3.AP)
+dfK<-as.data.frame(t(gof(sim=simK, obs=obsK)))
+K<-dfK$`NRMSE %`
+
+obsL<-c(data$L3.TR)
+simL<-c(five_one_imp$L3.TR)
+dfL<-as.data.frame(t(gof(sim=simL, obs=obsL)))
+L<-dfL$`NRMSE %`
+```
+
+#five_two_imp
+```{r}
+obsAA<-c(data$FL.Left)
+simAA<-c(five_two_imp$FL.Left)
+dfAA<-as.data.frame(t(gof(sim=simAA, obs=obsAA)))
+AA<-dfAA$`NRMSE %`
+
+obsBB<-c(data$FL.Right)
+simBB<-c(five_two_imp$FL.Right)
+dfBB<-as.data.frame(t(gof(sim=simBB, obs=obsBB)))
+BB<-dfBB$`NRMSE %`
+
+obsCC<-c(data$T1.AP)
+simCC<-c(five_two_imp$T1.AP)
+dfCC<-as.data.frame(t(gof(sim=simCC, obs=obsCC)))
+CC<-dfCC$`NRMSE %`
+
+obsDD<-c(data$T1.TR)
+simDD<-c(five_two_imp$T1.TR)
+dfDD<-as.data.frame(t(gof(sim=simDD, obs=obsDD)))
+DD<-dfDD$`NRMSE %`
+
+obsEE<-c(data$T5.AP)
+simEE<-c(five_two_imp$T5.AP)
+dfEE<-as.data.frame(t(gof(sim=simEE, obs=obsEE)))
+EE<-dfEE$`NRMSE %`
+
+obsFF<-c(data$T5.TR)
+simFF<-c(five_two_imp$T5.TR)
+dfFF<-as.data.frame(t(gof(sim=simFF, obs=obsFF)))
+FF<-dfFF$`NRMSE %`
+
+obsGG<-c(data$T10.AP)
+simGG<-c(five_two_imp$T10.AP)
+dfGG<-as.data.frame(t(gof(sim=simGG, obs=obsGG)))
+GG<-dfGG$`NRMSE %`
+
+obsHH<-c(data$T10.TR)
+simHH<-c(five_two_imp$T10.TR)
+dfHH<-as.data.frame(t(gof(sim=simHH, obs=obsHH)))
+HH<-dfHH$`NRMSE %`
+
+obsII<-c(data$L1.AP)
+simII<-c(five_two_imp$L1.AP)
+dfII<-as.data.frame(t(gof(sim=simII, obs=obsII)))
+II<-dfII$`NRMSE %`
+
+obsJJ<-c(data$L1.TR)
+simJJ<-c(five_two_imp$L1.TR)
+dfJJ<-as.data.frame(t(gof(sim=simJJ, obs=obsJJ)))
+JJ<-dfJJ$`NRMSE %`
+
+obsKK<-c(data$L3.AP)
+simKK<-c(five_two_imp$L3.AP)
+dfKK<-as.data.frame(t(gof(sim=simKK, obs=obsKK)))
+KK<-dfKK$`NRMSE %`
+
+obsLL<-c(data$L3.TR)
+simLL<-c(five_two_imp$L3.TR)
+dfLL<-as.data.frame(t(gof(sim=simLL, obs=obsLL)))
+LL<-dfLL$`NRMSE %`
+```
+
+#five_three_imp
+```{r}
+obsAAA<-c(data$FL.Left)
+simAAA<-c(five_three_imp$FL.Left)
+dfAAA<-as.data.frame(t(gof(sim=simAAA, obs=obsAAA)))
+AAA<-dfAAA$`NRMSE %`
+
+obsBBB<-c(data$FL.Right)
+simBBB<-c(five_three_imp$FL.Right)
+dfBBB<-as.data.frame(t(gof(sim=simBBB, obs=obsBBB)))
+BBB<-dfBBB$`NRMSE %`
+
+obsCCC<-c(data$T1.AP)
+simCCC<-c(five_three_imp$T1.AP)
+dfCCC<-as.data.frame(t(gof(sim=simCCC, obs=obsCCC)))
+CCC<-dfCCC$`NRMSE %`
+
+obsDDD<-c(data$T1.TR)
+simDDD<-c(five_three_imp$T1.TR)
+dfDDD<-as.data.frame(t(gof(sim=simDDD, obs=obsDDD)))
+DDD<-dfDDD$`NRMSE %`
+
+obsEEE<-c(data$T5.AP)
+simEEE<-c(five_three_imp$T5.AP)
+dfEEE<-as.data.frame(t(gof(sim=simEEE, obs=obsEEE)))
+EEE<-dfEEE$`NRMSE %`
+
+obsFFF<-c(data$T5.TR)
+simFFF<-c(five_three_imp$T5.TR)
+dfFFF<-as.data.frame(t(gof(sim=simFFF, obs=obsFFF)))
+FFF<-dfFFF$`NRMSE %`
+
+obsGGG<-c(data$T10.AP)
+simGGG<-c(five_three_imp$T10.AP)
+dfGGG<-as.data.frame(t(gof(sim=simGGG, obs=obsGGG)))
+GGG<-dfGGG$`NRMSE %`
+
+obsHHH<-c(data$T10.TR)
+simHHH<-c(five_three_imp$T10.TR)
+dfHHH<-as.data.frame(t(gof(sim=simHHH, obs=obsHHH)))
+HHH<-dfHHH$`NRMSE %`
+
+obsIII<-c(data$L1.AP)
+simIII<-c(five_three_imp$L1.AP)
+dfIII<-as.data.frame(t(gof(sim=simIII, obs=obsIII)))
+III<-dfIII$`NRMSE %`
+
+obsJJJ<-c(data$L1.TR)
+simJJJ<-c(five_three_imp$L1.TR)
+dfJJJ<-as.data.frame(t(gof(sim=simJJJ, obs=obsJJJ)))
+JJJ<-dfJJJ$`NRMSE %`
+
+obsKKK<-c(data$L3.AP)
+simKKK<-c(five_three_imp$L3.AP)
+dfKKK<-as.data.frame(t(gof(sim=simKKK, obs=obsKKK)))
+KKK<-dfKKK$`NRMSE %`
+
+obsLLL<-c(data$L3.TR)
+simLLL<-c(five_three_imp$L3.TR)
+dfLLL<-as.data.frame(t(gof(sim=simLLL, obs=obsLLL)))
+LLL<-dfLLL$`NRMSE %`
+```
+
+#five_four_imp
+```{r}
+obsAAAA<-c(data$FL.Left)
+simAAAA<-c(five_four_imp$FL.Left)
+dfAAAA<-as.data.frame(t(gof(sim=simAAAA, obs=obsAAAA)))
+AAAA<-dfAAAA$`NRMSE %`
+
+obsBBBB<-c(data$FL.Right)
+simBBBB<-c(five_four_imp$FL.Right)
+dfBBBB<-as.data.frame(t(gof(sim=simBBBB, obs=obsBBBB)))
+BBBB<-dfBBBB$`NRMSE %`
+
+obsCCCC<-c(data$T1.AP)
+simCCCC<-c(five_four_imp$T1.AP)
+dfCCCC<-as.data.frame(t(gof(sim=simCCCC, obs=obsCCCC)))
+CCCC<-dfCCCC$`NRMSE %`
+
+obsDDDD<-c(data$T1.TR)
+simDDDD<-c(five_four_imp$T1.TR)
+dfDDDD<-as.data.frame(t(gof(sim=simDDDD, obs=obsDDDD)))
+DDDD<-dfDDDD$`NRMSE %`
+
+obsEEEE<-c(data$T5.AP)
+simEEEE<-c(five_four_imp$T5.AP)
+dfEEEE<-as.data.frame(t(gof(sim=simEEEE, obs=obsEEEE)))
+EEEE<-dfEEEE$`NRMSE %`
+
+obsFFFF<-c(data$T5.TR)
+simFFFF<-c(five_four_imp$T5.TR)
+dfFFFF<-as.data.frame(t(gof(sim=simFFFF, obs=obsFFFF)))
+FFFF<-dfFFFF$`NRMSE %`
+
+obsGGGG<-c(data$T10.AP)
+simGGGG<-c(five_four_imp$T10.AP)
+dfGGGG<-as.data.frame(t(gof(sim=simGGGG, obs=obsGGGG)))
+GGGG<-dfGGGG$`NRMSE %`
+
+obsHHHH<-c(data$T10.TR)
+simHHHH<-c(five_four_imp$T10.TR)
+dfHHHH<-as.data.frame(t(gof(sim=simHHHH, obs=obsHHHH)))
+HHHH<-dfHHHH$`NRMSE %`
+
+obsIIII<-c(data$L1.AP)
+simIIII<-c(five_four_imp$L1.AP)
+dfIIII<-as.data.frame(t(gof(sim=simIIII, obs=obsIIII)))
+IIII<-dfIIII$`NRMSE %`
+
+obsJJJJ<-c(data$L1.TR)
+simJJJJ<-c(five_four_imp$L1.TR)
+dfJJJJ<-as.data.frame(t(gof(sim=simJJJJ, obs=obsJJJJ)))
+JJJJ<-dfJJJJ$`NRMSE %`
+
+obsKKKK<-c(data$L3.AP)
+simKKKK<-c(five_four_imp$L3.AP)
+dfKKKK<-as.data.frame(t(gof(sim=simKKKK, obs=obsKKKK)))
+KKKK<-dfKKKK$`NRMSE %`
+
+obsLLLL<-c(data$L3.TR)
+simLLLL<-c(five_four_imp$L3.TR)
+dfLLLL<-as.data.frame(t(gof(sim=simLLLL, obs=obsLLLL)))
+LLLL<-dfLLLL$`NRMSE %`
+```
+
+#five_five_imp
+```{r}
+obsAAAAA<-c(data$FL.Left)
+simAAAAA<-c(five_five_imp$FL.Left)
+dfAAAAA<-as.data.frame(t(gof(sim=simAAAAA, obs=obsAAAAA)))
+AAAAA<-dfAAAAA$`NRMSE %`
+
+obsBBBBB<-c(data$FL.Right)
+simBBBBB<-c(five_five_imp$FL.Right)
+dfBBBBB<-as.data.frame(t(gof(sim=simBBBBB, obs=obsBBBBB)))
+BBBBB<-dfBBBBB$`NRMSE %`
+
+obsCCCCC<-c(data$T1.AP)
+simCCCCC<-c(five_five_imp$T1.AP)
+dfCCCCC<-as.data.frame(t(gof(sim=simCCCCC, obs=obsCCCCC)))
+CCCCC<-dfCCCCC$`NRMSE %`
+
+obsDDDDD<-c(data$T1.TR)
+simDDDDD<-c(five_five_imp$T1.TR)
+dfDDDDD<-as.data.frame(t(gof(sim=simDDDDD, obs=obsDDDDD)))
+DDDDD<-dfDDDDD$`NRMSE %`
+
+obsEEEEE<-c(data$T5.AP)
+simEEEEE<-c(five_five_imp$T5.AP)
+dfEEEEE<-as.data.frame(t(gof(sim=simEEEEE, obs=obsEEEEE)))
+EEEEE<-dfEEEEE$`NRMSE %`
+
+obsFFFFF<-c(data$T5.TR)
+simFFFFF<-c(five_five_imp$T5.TR)
+dfFFFFF<-as.data.frame(t(gof(sim=simFFFFF, obs=obsFFFFF)))
+FFFFF<-dfFFFFF$`NRMSE %`
+
+obsGGGGG<-c(data$T10.AP)
+simGGGGG<-c(five_five_imp$T10.AP)
+dfGGGGG<-as.data.frame(t(gof(sim=simGGGGG, obs=obsGGGGG)))
+GGGGG<-dfGGGGG$`NRMSE %`
+
+obsHHHHH<-c(data$T10.TR)
+simHHHHH<-c(five_five_imp$T10.TR)
+dfHHHHH<-as.data.frame(t(gof(sim=simHHHHH, obs=obsHHHHH)))
+HHHHH<-dfHHHHH$`NRMSE %`
+
+obsIIIII<-c(data$L1.AP)
+simIIIII<-c(five_five_imp$L1.AP)
+dfIIIII<-as.data.frame(t(gof(sim=simIIIII, obs=obsIIIII)))
+IIIII<-dfIIIII$`NRMSE %`
+
+obsJJJJJ<-c(data$L1.TR)
+simJJJJJ<-c(five_five_imp$L1.TR)
+dfJJJJJ<-as.data.frame(t(gof(sim=simJJJJJ, obs=obsJJJJJ)))
+JJJJJ<-dfJJJJJ$`NRMSE %`
+
+obsKKKKK<-c(data$L3.AP)
+simKKKKK<-c(five_five_imp$L3.AP)
+dfKKKKK<-as.data.frame(t(gof(sim=simKKKKK, obs=obsKKKKK)))
+KKKKK<-dfKKKKK$`NRMSE %`
+
+obsLLLLL<-c(data$L3.TR)
+simLLLLL<-c(five_five_imp$L3.TR)
+dfLLLLL<-as.data.frame(t(gof(sim=simLLLLL, obs=obsLLLLL)))
+LLLLL<-dfLLLLL$`NRMSE %`
+```
+
+Put each NRMSE into a matrix to create a usable dataframe that can be exported to Excel
+```{r}
+aa<-matrix(c(A, B, C, D, E, F, G, H, I, J, K, L), 1, 12)
+
+ab<-matrix(c(AA, BB, CC, DD, EE, FF, GG, HH, II, JJ, KK, LL), 1, 12)
+
+ac<-matrix(c(AAA, BBB, CCC, DDD, EEE, FFF, GGG, HH, III, JJJ, KKK, LLL), 1, 12)
+
+ad<-matrix(c(AAAA, BBBB, CCCC, DDDD, EEEE, FFFF, GGGG, HHHH, IIII, JJJJ, KKKK, LLLL), 1, 12)
+
+ae<-matrix(c(AAAAA, BBBBB, CCCCC, DDDDD, EEEEE, FFFFF, GGGGG, HHHHH, IIIII, JJJJJ, KKKKK, LLLLL), 1, 12)
+
+df.cont.reg<-data.frame(rbind(aa, ab, ac, ad, ae))
+colnames(df.cont.reg)<-c("FL.Left", "FL.Right", "T1.AP", "T1.TR", "T5.AP", "T5.TR", "T10.AP", "T10.TR", "L1.AP", "L1.TR", "L3.AP", "L3.TR")
+rownames(df.cont.reg)<-c("five_one_imp", "five_two_imp", "five_three_imp", "five_four_imp", "five_five_imp")
+write.csv(df.cont.reg, file="nrmse.continuous.5.reg.csv")
+```

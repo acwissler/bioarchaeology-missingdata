@@ -1,0 +1,82 @@
+#####Listwise Deletion of Ordinal variables#####
+
+This example uses 5% missingness 
+Packages Required: None
+
+#STEP 1# Load packages and set working directory
+```{r}
+library(knitr)
+rm(list=ls())
+
+setwd("C:/Users/Amanda Wissler/Documents/Spring 2022/Manuscripts/MIssing data II/R code/GitHub")
+```
+
+#STEP 2# Load the data
+
+*Practice.Ordinal.Dataset.csv* is the complete dataset - i.e. no missing data. The complete dataset is needed in order to evaluate the success of the imputation/deletion method
+
+*ord.five.1.practive.csv* is the first version of the complete dataset that has 5% of the values missing.
+*ord.five.2.practice.csv* is the second version of the complete dataset that has 5% of the values missing. Etc. Each of the 5 versions has different values missing.
+
+Having multiple versions ensures that the overall results are not due to random chance. Here, I chose 5 versions, but you could choose 3 or 10 or however many you want. 
+```{r}
+data<-read.csv("Practice.Ordinal.Dataset.csv", header=T)
+
+ord.five.1<-read.csv("ord.five.1.practice.csv", header=T)
+ord.five.2<-read.csv("ord.five.2.practice.csv", header=T)
+ord.five.3<-read.csv("ord.five.3.practice.csv", header=T)
+ord.five.4<-read.csv("ord.five.4.practice.csv", header=T)
+ord.five.5<-read.csv("ord.five.5.practice.csv", header=T)
+```
+
+
+#STEP 3# Listwise Deletion
+Use the "na.omit" function to remove all rows that have at least 1 NA
+```{r}
+ord.five.1<-na.omit(ord.five.1)
+ord.five.2<-na.omit(ord.five.2)
+ord.five.3<-na.omit(ord.five.3)
+ord.five.4<-na.omit(ord.five.4)
+ord.five.5<-na.omit(ord.five.5)
+```
+
+
+#STEP 4# Calculate Success Parameters
+
+**Calculate Percent Error**
+
+Now that we have created 5 imputed datasets, we must assess how close the imputed values are to the original dataset
+Here we establish the variable means for the complete dataset so we can calculate the percent error by variable at the end
+```{r}
+PHdatmean<-mean(data$PH)
+COdatmean<-mean(data$CO)
+PDdatmean<-mean(data$PD)
+LEHdatmean<-mean(data$LEH)
+periostosisdatmean<-mean(data$periostosis)
+```
+
+
+**Prepare Data to calculate Percent Error**
+We must combine the means across each of the 5 versions by variable so that we produce a single percent error for each variable at the end. 
+```{r}
+PH.mean.listwise<-mean(c(ord.five.1$PH, ord.five.2$PH, ord.five.3$PH, ord.five.4$PH, ord.five.5$PH))
+CO.mean.listwise<-mean(c(ord.five.1$CO, ord.five.2$CO, ord.five.3$CO, ord.five.4$CO, ord.five.5$CO))
+PD.mean.listwise<-mean(c(ord.five.1$PD, ord.five.2$PD, ord.five.3$PD, ord.five.4$PD, ord.five.5$PD))
+LEH.mean.listwise<-mean(c(ord.five.1$LEH, ord.five.2$LEH, ord.five.3$LEH, ord.five.4$LEH, ord.five.5$LEH))
+periostosis.mean.listwise<-mean(c(ord.five.1$periostosis, ord.five.2$periostosis, ord.five.3$periostosis, ord.five.4$periostosis, ord.five.5$periostosis))
+```
+
+**Calculate the Percent Error**
+
+Percent error is the absolute value of the observed value minus the expected value divided by the expected, all multiplied by 100
+```{r}
+ab<-c((abs((PH.mean.listwise-PHdatmean)/PHdatmean)*100),(abs((CO.mean.listwise-COdatmean)/COdatmean)*100),(abs((PD.mean.listwise-PDdatmean)/PDdatmean)*100),(abs((LEH.mean.listwise-LEHdatmean)/LEHdatmean)*100),(abs((periostosis.mean.listwise-periostosisdatmean)/periostosisdatmean)*100))
+```
+
+Here we generate a dataframe that has the percent error for each variable and then export it as a .csv file
+```{r}
+df.listwise<-data.frame(ab)
+colnames(df.listwise)<-c("PercentError")
+rownames(df.listwise)<-c("PH", "CO", "PD", "LEH", "periostosis")
+write.csv(df.listwise, file="Results.five.ordinal.listwise.practice.csv")
+```

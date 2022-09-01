@@ -1,0 +1,171 @@
+#####Pairwise Deletion of Continuous variables#####
+
+This example uses 5% missingness 
+Packages Required: None
+
+#STEP 1# Load packages and set working directory
+```{r}
+library(knitr)
+rm(list=ls())
+
+setwd("C:/Users/Amanda Wissler/Documents/Spring 2022/Manuscripts/MIssing data II/R code/GitHub")
+```
+
+#STEP 2# Load the data
+
+*Practice.Continuous.Dataset.csv* is the complete dataset - i.e. no missing data. The complete dataset is needed in order to evaluate the success of the imputation/deletion method
+
+*cont.five.1.practive.csv* is the first version of the complete dataset that has 5% of the values missing.
+*cont.five.2.practice.csv* is the second version of the complete dataset that has 5% of the values missing. Etc. Each of the 5 versions has different values missing.
+
+Having multiple versions ensures that the overall results are not due to random chance. Here, I chose 5 versions, but you could choose 3 or 10 or however many you want. 
+```{r}
+data<-read.csv("Practice.Continuous.Dataset.csv", header=T)
+
+cont.five.1<-read.csv("cont.five.1.practice.csv", header=T)
+cont.five.2<-read.csv("cont.five.2.practice.csv", header=T)
+cont.five.3<-read.csv("cont.five.3.practice.csv", header=T)
+cont.five.4<-read.csv("cont.five.4.practice.csv", header=T)
+cont.five.5<-read.csv("cont.five.5.practice.csv", header=T)
+```
+
+#STEP 3# Pairwise Deletion
+
+**Calculate the mean of each variable for each version of the dataset**
+
+For Pairwise Deletion make sure that na.rm=TRUE as that will drop NAs on a pairwise basis
+
+This is for the first version 
+```{r}
+FL.L.mean.pairwise.1<-mean(cont.five.1$FL.L, na.rm=TRUE)
+FL.R.mean.pairwise.1<-mean(cont.five.1$FL.Right, na.rm=TRUE)
+T1.AP.mean.pairwise.1<-mean(cont.five.1$T1.AP, na.rm=TRUE)
+T1.TR.mean.pairwise.1<-mean(cont.five.1$T1.TR, na.rm=TRUE)
+T5.AP.mean.pairwise.1<-mean(cont.five.1$T5.AP, na.rm=TRUE)
+T5.TR.mean.pairwise.1<-mean(cont.five.1$T5.TR, na.rm=TRUE)
+T10.AP.mean.pairwise.1<-mean(cont.five.1$T10.AP, na.rm=TRUE)
+T10.TR.mean.pairwise.1<-mean(cont.five.1$T10.TR, na.rm=TRUE)
+L1.AP.mean.pairwise.1<-mean(cont.five.1$L1.AP, na.rm=TRUE)
+L1.TR.mean.pairwise.1<-mean(cont.five.1$L1.TR, na.rm=TRUE)
+L3.AP.mean.pairwise.1<-mean(cont.five.1$L3.AP, na.rm=TRUE)
+L3.TR.mean.pairwise.1<-mean(cont.five.1$L3.TR, na.rm=TRUE)
+```
+
+This is for the second version 
+```{r}
+FL.L.mean.pairwise.2<-mean(cont.five.2$FL.Left, na.rm=TRUE)
+FL.R.mean.pairwise.2<-mean(cont.five.2$FL.Right, na.rm=TRUE)
+T1.AP.mean.pairwise.2<-mean(cont.five.2$T1.AP, na.rm=TRUE)
+T1.TR.mean.pairwise.2<-mean(cont.five.2$T1.TR, na.rm=TRUE)
+T5.AP.mean.pairwise.2<-mean(cont.five.2$T5.AP, na.rm=TRUE)
+T5.TR.mean.pairwise.2<-mean(cont.five.2$T5.TR, na.rm=TRUE)
+T10.AP.mean.pairwise.2<-mean(cont.five.2$T10.AP, na.rm=TRUE)
+T10.TR.mean.pairwise.2<-mean(cont.five.2$T10.TR, na.rm=TRUE)
+L1.AP.mean.pairwise.2<-mean(cont.five.2$L1.AP, na.rm=TRUE)
+L1.TR.mean.pairwise.2<-mean(cont.five.2$L1.TR, na.rm=TRUE)
+L3.AP.mean.pairwise.2<-mean(cont.five.2$L3.AP, na.rm=TRUE)
+L3.TR.mean.pairwise.2<-mean(cont.five.2$L3.TR, na.rm=TRUE)
+```
+
+This is for the third version
+```{r}
+FL.L.mean.pairwise.3<-mean(cont.five.3$FL.Left, na.rm=TRUE)
+FL.R.mean.pairwise.3<-mean(cont.five.3$FL.Right, na.rm=TRUE)
+T1.AP.mean.pairwise.3<-mean(cont.five.3$T1.AP, na.rm=TRUE)
+T1.TR.mean.pairwise.3<-mean(cont.five.3$T1.TR, na.rm=TRUE)
+T5.AP.mean.pairwise.3<-mean(cont.five.3$T5.AP, na.rm=TRUE)
+T5.TR.mean.pairwise.3<-mean(cont.five.3$T5.TR, na.rm=TRUE)
+T10.AP.mean.pairwise.3<-mean(cont.five.3$T10.AP, na.rm=TRUE)
+T10.TR.mean.pairwise.3<-mean(cont.five.3$T10.TR, na.rm=TRUE)
+L1.AP.mean.pairwise.3<-mean(cont.five.3$L1.AP, na.rm=TRUE)
+L1.TR.mean.pairwise.3<-mean(cont.five.3$L1.TR, na.rm=TRUE)
+L3.AP.mean.pairwise.3<-mean(cont.five.3$L3.AP, na.rm=TRUE)
+L3.TR.mean.pairwise.3<-mean(cont.five.3$L3.TR, na.rm=TRUE)
+```
+
+This is for the fourth version
+```{r}
+FL.L.mean.pairwise.4<-mean(cont.five.4$FL.Left, na.rm=TRUE)
+FL.R.mean.pairwise.4<-mean(cont.five.4$FL.Right, na.rm=TRUE)
+T1.AP.mean.pairwise.4<-mean(cont.five.4$T1.AP, na.rm=TRUE)
+T1.TR.mean.pairwise.4<-mean(cont.five.4$T1.TR, na.rm=TRUE)
+T5.AP.mean.pairwise.4<-mean(cont.five.4$T5.AP, na.rm=TRUE)
+T5.TR.mean.pairwise.4<-mean(cont.five.4$T5.TR, na.rm=TRUE)
+T10.AP.mean.pairwise.4<-mean(cont.five.4$T10.AP, na.rm=TRUE)
+T10.TR.mean.pairwise.4<-mean(cont.five.4$T10.TR, na.rm=TRUE)
+L1.AP.mean.pairwise.4<-mean(cont.five.4$L1.AP, na.rm=TRUE)
+L1.TR.mean.pairwise.4<-mean(cont.five.4$L1.TR, na.rm=TRUE)
+L3.AP.mean.pairwise.4<-mean(cont.five.4$L3.AP, na.rm=TRUE)
+L3.TR.mean.pairwise.4<-mean(cont.five.4$L3.TR, na.rm=TRUE)
+```
+
+This is for the fifth version 
+```{r}
+FL.L.mean.pairwise.5<-mean(cont.five.5$FL.Left, na.rm=TRUE)
+FL.R.mean.pairwise.5<-mean(cont.five.5$FL.Right, na.rm=TRUE)
+T1.AP.mean.pairwise.5<-mean(cont.five.5$T1.AP, na.rm=TRUE)
+T1.TR.mean.pairwise.5<-mean(cont.five.5$T1.TR, na.rm=TRUE)
+T5.AP.mean.pairwise.5<-mean(cont.five.5$T5.AP, na.rm=TRUE)
+T5.TR.mean.pairwise.5<-mean(cont.five.5$T5.TR, na.rm=TRUE)
+T10.AP.mean.pairwise.5<-mean(cont.five.5$T10.AP, na.rm=TRUE)
+T10.TR.mean.pairwise.5<-mean(cont.five.5$T10.TR, na.rm=TRUE)
+L1.AP.mean.pairwise.5<-mean(cont.five.5$L1.AP, na.rm=TRUE)
+L1.TR.mean.pairwise.5<-mean(cont.five.5$L1.TR, na.rm=TRUE)
+L3.AP.mean.pairwise.5<-mean(cont.five.5$L3.AP, na.rm=TRUE)
+L3.TR.mean.pairwise.5<-mean(cont.five.5$L3.TR, na.rm=TRUE)
+```
+
+
+#STEP 4# Calculate Success Parameters
+
+**Calculate Percent Error**
+
+Now that we have created 5 imputed datasets, we must assess how close the imputed values are to the original dataset
+Here we establish the variable means for the complete dataset so we can calculate the percent error by variable at the end
+```{r}
+FL.Ldatmean<-mean(data$FL.Left)
+FL.Rdatmean<-mean(data$FL.Right)
+T1.APdatmean<-mean(data$T1.AP)
+T1.TRdatmean<-mean(data$T1.TR)
+T5.APdatmean<-mean(data$T5.AP)
+T5.TRdatmean<-mean(data$T5.TR)
+T10.APdatmean<-mean(data$T10.AP)
+T10.TRdatmean<-mean(data$T10.TR)
+L1.APdatmean<-mean(data$L1.AP)
+L1.TRdatmean<-mean(data$L1.TR)
+L3.APdatmean<-mean(data$L3.AP)
+L3.TRdatmean<-mean(data$L3.TR)
+```
+
+
+**Prepare Data to calculate Percent Error**
+We must combine the means across each of the 5 versions by variable so that we produce a single percent error for each variable at the end. 
+```{r}
+FL.L.mean.pairwise<-mean(FL.L.mean.pairwise.1, FL.L.mean.pairwise.2, FL.L.mean.pairwise.3, FL.L.mean.pairwise.4, FL.L.mean.pairwise.5)
+FL.R.mean.pairwise<-mean(FL.R.mean.pairwise.1, FL.R.mean.pairwise.2, FL.R.mean.pairwise.3, FL.R.mean.pairwise.4, FL.R.mean.pairwise.5)
+T1.AP.mean.pairwise<-mean(T1.AP.mean.pairwise.1, T1.AP.mean.pairwise.2, T1.AP.mean.pairwise.3, T1.AP.mean.pairwise.4, T1.AP.mean.pairwise.5)
+T1.TR.mean.pairwise<-mean(T1.TR.mean.pairwise.1, T1.TR.mean.pairwise.2, T1.TR.mean.pairwise.3, T1.TR.mean.pairwise.4, T1.TR.mean.pairwise.5)
+T5.AP.mean.pairwise<-mean(T5.AP.mean.pairwise.1, T5.AP.mean.pairwise.2, T5.AP.mean.pairwise.3, T5.AP.mean.pairwise.4, T5.AP.mean.pairwise.5)
+T5.TR.mean.pairwise<-mean(T5.TR.mean.pairwise.1, T5.TR.mean.pairwise.2, T5.TR.mean.pairwise.3, T5.TR.mean.pairwise.4, T5.TR.mean.pairwise.5)
+T10.AP.mean.pairwise<-mean(T10.AP.mean.pairwise.1, T10.AP.mean.pairwise.2, T10.AP.mean.pairwise.3, T10.AP.mean.pairwise.4, T10.AP.mean.pairwise.5)
+T10.TR.mean.pairwise<-mean(T10.TR.mean.pairwise.1, T10.TR.mean.pairwise.2, T10.TR.mean.pairwise.3, T10.TR.mean.pairwise.4, T10.TR.mean.pairwise.5)
+L1.AP.mean.pairwise<-mean(L1.AP.mean.pairwise.1, L1.AP.mean.pairwise.2, L1.AP.mean.pairwise.3, L1.AP.mean.pairwise.4, L1.AP.mean.pairwise.5)
+L1.TR.mean.pairwise<-mean(L1.TR.mean.pairwise.1, L1.TR.mean.pairwise.2, L1.TR.mean.pairwise.3, L1.TR.mean.pairwise.4, L1.TR.mean.pairwise.5)
+L3.AP.mean.pairwise<-mean(L3.AP.mean.pairwise.1, L3.AP.mean.pairwise.2, L3.AP.mean.pairwise.3, L3.AP.mean.pairwise.4, L3.AP.mean.pairwise.5)
+L3.TR.mean.pairwise<-mean(L3.TR.mean.pairwise.1, L3.TR.mean.pairwise.2, L3.TR.mean.pairwise.3, L3.TR.mean.pairwise.4, L3.TR.mean.pairwise.5)
+```
+
+**Calculate the Percent Error**
+
+Percent error is the absolute value of the observed value minus the expected value divided by the expected, all multiplied by 100
+```{r}
+ab<-c((abs((FL.L.mean.pairwise-FL.Ldatmean)/FL.Ldatmean)*100),(abs((FL.R.mean.pairwise-FL.Rdatmean)/FL.Rdatmean)*100),(abs((T1.AP.mean.pairwise-T1.APdatmean)/T1.APdatmean)*100),(abs((T1.TR.mean.pairwise-T1.TRdatmean)/T1.TRdatmean)*100),(abs((T5.AP.mean.pairwise-T5.APdatmean)/T5.APdatmean)*100), (abs((T5.TR.mean.pairwise-T5.TRdatmean)/T5.TRdatmean)*100), (abs((T10.AP.mean.pairwise-T10.APdatmean)/T10.APdatmean)*100), (abs((T10.TR.mean.pairwise-T10.TRdatmean)/T10.TRdatmean)*100), (abs((L1.AP.mean.pairwise-L1.APdatmean)/L1.APdatmean)*100), (abs((L1.TR.mean.pairwise-L1.TRdatmean)/L1.TRdatmean)*100), (abs((L3.AP.mean.pairwise-L3.APdatmean)/L3.APdatmean)*100), (abs((L3.TR.mean.pairwise-L3.TRdatmean)/L3.TRdatmean)*100))
+```
+
+Here we generate a dataframe that has the percent error for each variable and then export it as a .csv file
+```{r}
+df.mean<-data.frame(ab)
+colnames(df.mean)<-c("PercentError")
+rownames(df.mean)<-c("FL.L", "FL.R", "T1.AP", "T1.TR", "T5.AP", "T5.TR", "T10.AP", "T10.TR", "L1.AP", "L1.TR", "L3.AP", "L3.TR")
+write.csv(df.mean, file="Results.five.continuous.pair.csv")
+```

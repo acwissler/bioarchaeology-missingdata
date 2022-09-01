@@ -1,0 +1,91 @@
+####Listwise Deletion of Continuous variables####
+
+This example uses 5% missingness 
+
+Packages Required: 
+none
+
+#STEP 1# Load packages and set working directory
+```{r}
+library(knitr)
+rm(list=ls())
+
+setwd("C:/Users/Amanda Wissler/Documents/Spring 2022/Manuscripts/MIssing data II/R code/GitHub")
+```
+
+
+#STEP 2# Load the data
+
+*Practice.Continuous.Dataset.csv* is the complete dataset - i.e. no missing data. The complete dataset is needed in order to evaluate the success of the imputation/deletion method
+
+*cont.five.1.practive.csv* is the first version of the complete dataset that has 5% of the values missing.
+*cont.five.2.practice.csv* is the second version of the complete dataset that has 5% of the values missing. Etc. Each of the 5 versions has different values missing.
+
+Having multiple versions ensures that the overall results are not due to random chance. Here, I chose 5 versions, but you could choose 3 or 10 or however many you want. 
+```{r}
+data<-read.csv("Practice.Continuous.Dataset.csv", header=T)
+
+cont.five.1<-read.csv("cont.five.1.practice.csv", header=T)
+cont.five.2<-read.csv("cont.five.2.practice.csv", header=T)
+cont.five.3<-read.csv("cont.five.3.practice.csv", header=T)
+cont.five.4<-read.csv("cont.five.4.practice.csv", header=T)
+cont.five.5<-read.csv("cont.five.5.practice.csv", header=T)
+```
+
+
+#STEP 3# Listwise Deletion
+Use the "na.omit" function to remove all rows that have at least 1 NA
+```{r}
+cont.five.1<-na.omit(cont.five.1)
+cont.five.2<-na.omit(cont.five.2)
+cont.five.3<-na.omit(cont.five.3)
+cont.five.4<-na.omit(cont.five.4)
+cont.five.5<-na.omit(cont.five.5)
+```
+
+
+#STEP 4# Calculate Success Parameters
+Now that we have created 5 imputed datasets, we must assess how close the imputed values are to the original dataset
+
+**Calculate Percent Error**
+
+Here we establish the variable means for the complete dataset so we can calculate the percent error by variable at the end
+```{r}
+FL.Ldatmean<-mean(data$FL.Left)
+FL.Rdatmean<-mean(data$FL.Right)
+T1.APdatmean<-mean(data$T1.AP)
+T1.TRdatmean<-mean(data$T1.TR)
+T5.APdatmean<-mean(data$T5.AP)
+T5.TRdatmean<-mean(data$T5.TR)
+T10.APdatmean<-mean(data$T10.AP)
+T10.TRdatmean<-mean(data$T10.TR)
+L1.APdatmean<-mean(data$L1.AP)
+L1.TRdatmean<-mean(data$L1.TR)
+L3.APdatmean<-mean(data$L3.AP)
+L3.TRdatmean<-mean(data$L3.TR)
+```
+
+*Prepare Data to calculate Percent Error*
+We must combine the means across each of the 5 versions by variable so that we produce a single percent error for each variable at the end. 
+```{r}
+FL.L.mean<-mean(c(cont.five.1$FL.Left, cont.five.2$FL.Left, cont.five.3$FL.Left, cont.five.4$FL.Left, cont.five.5$FL.Left))
+FL.R.mean<-mean(c(cont.five.1$FL.Right, cont.five.2$FL.Right, cont.five.3$FL.Right, cont.five.4$FL.Right, cont.five.5$FL.Right))
+T1.AP.mean<-mean(c(cont.five.1$T1.AP, cont.five.2$T1.AP, cont.five.3$T1.AP, cont.five.4$T1.AP, cont.five.5$T1.AP))
+T1.TR.mean<-mean(c(cont.five.1$T1.TR, cont.five.2$T1.TR, cont.five.3$T1.TR, cont.five.4$T1.TR, cont.five.5$T1.TR))
+T5.AP.mean<-mean(c(cont.five.1$T5.AP, cont.five.2$T5.AP, cont.five.3$T5.AP, cont.five.4$T5.AP, cont.five.5$T5.AP))
+T5.TR.mean<-mean(c(cont.five.1$T5.TR, cont.five.2$T5.TR, cont.five.3$T5.TR, cont.five.4$T5.TR, cont.five.5$T5.TR))
+T10.AP.mean<-mean(c(cont.five.1$T10.AP, cont.five.2$T10.AP, cont.five.3$T10.AP, cont.five.4$T10.AP, cont.five.5$T10.AP))
+T10.TR.mean<-mean(c(cont.five.1$T10.TR, cont.five.2$T10.TR, cont.five.3$T10.TR, cont.five.4$T10.TR, cont.five.5$T10.TR))
+L1.AP.mean<-mean(c(cont.five.1$L1.AP, cont.five.2$L1.AP, cont.five.3$L1.AP, cont.five.4$L1.AP, cont.five.5$L1.AP))
+L1.TR.mean<-mean(c(cont.five.1$L1.TR, cont.five.2$L1.TR, cont.five.3$L1.TR, cont.five.4$L1.TR, cont.five.5$L1.TR))
+L3.AP.mean<-mean(c(cont.five.1$L3.AP, cont.five.2$L3.AP, cont.five.3$L3.AP, cont.five.4$L3.AP, cont.five.5$L3.AP))
+L3.TR.mean<-mean(c(cont.five.1$L3.TR, cont.five.2$L3.TR, cont.five.3$L3.TR, cont.five.4$L3.TR, cont.five.5$L3.TR))
+```
+
+Percent error is the absolute value of the observed value minus the expected value divided by the expected, all multiplied by 100
+Put each Percent Error into a matrix to create a usable dataframe that can be exported to Excel
+```{r}
+ab<-c((abs((FL.L.mean-FL.Ldatmean)/FL.Ldatmean)*100),(abs((FL.R.mean-FL.Rdatmean)/FL.Rdatmean)*100),(abs((T1.AP.mean-T1.APdatmean)/T1.APdatmean)*100),(abs((T1.TR.mean-T1.TRdatmean)/T1.TRdatmean)*100),(abs((T5.AP.mean-T5.APdatmean)/T5.APdatmean)*100), (abs((T5.TR.mean-T5.TRdatmean)/T5.TRdatmean)*100), (abs((T10.AP.mean-T10.APdatmean)/T10.APdatmean)*100), (abs((T10.TR.mean-T10.TRdatmean)/T10.TRdatmean)*100), (abs((L1.AP.mean-L1.APdatmean)/L1.APdatmean)*100), (abs((L1.TR.mean-L1.TRdatmean)/L1.TRdatmean)*100), (abs((L3.AP.mean-L3.APdatmean)/L3.APdatmean)*100), (abs((L3.TR.mean-L3.TRdatmean)/L3.TRdatmean)*100))
+
+write.csv(ab, file="PE.cont.listwise.csv")
+```
